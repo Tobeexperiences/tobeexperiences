@@ -1,0 +1,740 @@
+<!DOCTYPE html><html><head><meta name="x-poe-datastore-behavior" content="local_only"><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;"><meta http-equiv="x-dns-prefetch-control" content="off"><script src="https://puc.poecdn.net/authenticated_preview_page/standard.3ef2c256959faf5a756d.js"></script>
+    <meta charset="utf-8">
+    <title>Poe</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+  <script src="https://puc.poecdn.net/authenticated_preview_page/disableWebRTC.9710cebe07429a9e8e06.js"></script><meta name="x-poe-allow-downloads" content="true"><meta name="x-poe-datastore-behavior" content="disabled"><script src="https://puc.poecdn.net/authenticated_preview_page/tw.50ec1b0612bf5b0c30a5.js"></script><script src="https://puc.poecdn.net/authenticated_preview_page/deps.faccd16000d314dc16d5.js"></script><script src="https://puc.poecdn.net/authenticated_preview_page/exports.b0f0f482cdeb5302b0b9.js"></script><script src="https://puc.poecdn.net/authenticated_preview_page/renderer.75c73ae6b4235f62945a.js"></script><script>Object.defineProperty(exports, "__esModule", {value: true}); function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }var _react = require('react'); var _react2 = _interopRequireDefault(_react);
+
+
+
+
+var _lucidereact = require('lucide-react');
+
+// ---------- LOGO (recreación; en producción usar /logo-negro.png y /logo-blanco.png) ----------
+function LogoToBe({ claro = false, grande = false }) {
+  const color = claro ? "#ffffff" : "#0a0a0a";
+  return (
+    _react2.default.createElement('div', { className: "flex flex-col items-start leading-none select-none"    ,}
+      , _react2.default.createElement('span', {
+        className: `${grande ? "text-4xl" : "text-2xl"} font-black italic tracking-tight`,
+        style: { color, fontFamily: "'Arial Black', Arial, sans-serif" },}
+, "ToBe"
+
+      )
+      , _react2.default.createElement('span', {
+        className: `mt-0.5 font-bold ${grande ? "text-xs" : "text-[9px]"}`,
+        style: { color, letterSpacing: "0.45em" },}
+, "EXPERIENCES"
+
+      )
+      , _react2.default.createElement('svg', { width: grande ? 170 : 110, height: grande ? 14 : 10, viewBox: "0 0 110 10"   , className: "mt-0.5",}
+        , _react2.default.createElement('path', {
+          d: "M0 8 C 25 3, 40 2, 55 4 C 45 0, 42 -1, 38 1 C 55 2, 80 4, 110 5 C 80 7, 40 9, 0 8 Z"                              ,
+          fill: color,}
+        )
+      )
+    )
+  );
+}
+
+// ---------- DATOS ----------
+const ACTIVIDADES_INICIALES = [
+  {
+    id: "1", tipo: "actividad", nombre: "Baile", dia: "Martes",
+    descripcion:
+      "Clases de baile semanales donde los peques desarrollan ritmo, coordinación y confianza mientras se divierten. Los grupos se organizan según edad y demanda.",
+    horario: "15:45 – 16:45", frecuencia: "Todos los martes",
+    edadMinima: 3, edadMaxima: 12, edadTexto: "Grupos según edad y demanda",
+    validarEdad: false, plazasTotales: 16, plazasOcupadas: 9,
+    precioCents: 6500, icono: _lucidereact.Music, color: "rose",
+  },
+  {
+    id: "2", tipo: "actividad", nombre: "Introducción a la IA", dia: "Miércoles",
+    descripcion:
+      "Los peques descubren cómo funciona la inteligencia artificial con proyectos prácticos y creativos: crean sus primeros chatbots, entrenan modelos sencillos y aprenden a usar la tecnología de forma crítica y responsable.",
+    horario: "15:45 – 16:45", frecuencia: "Todos los miércoles",
+    edadMinima: 8, edadMaxima: 12, edadTexto: "8 – 12 años",
+    validarEdad: true, plazasTotales: 12, plazasOcupadas: 11,
+    precioCents: 6500, icono: _lucidereact.Cpu, color: "indigo",
+  },
+  {
+    id: "3", tipo: "actividad", nombre: "Arte y Dibujo", dia: "Jueves",
+    descripcion:
+      "Un espacio semanal para explorar la creatividad: dibujo, pintura y técnicas variadas adaptadas a cada edad. Los peques desarrollan su expresión artística y motricidad fina mientras crean obras que se llevan a casa.",
+    horario: "15:45 – 16:45", frecuencia: "Todos los jueves",
+    edadMinima: 5, edadMaxima: 12, edadTexto: "5 – 12 años",
+    validarEdad: true, plazasTotales: 14, plazasOcupadas: 5,
+    precioCents: 6000, icono: _lucidereact.Palette, color: "amber",
+  },
+  {
+    id: "4", tipo: "acogida", nombre: "Servicio de Acogida (1 hora)", dia: "Lunes a Viernes",
+    descripcion:
+      "Servicio diario de acogida para las familias que necesitan ampliar el horario. Los peques meriendan, juegan y hacen actividades tranquilas en un entorno seguro y supervisado hasta que sus familias los recogen.",
+    horario: "15:30 – 16:30", frecuencia: "De lunes a viernes, todos los días lectivos",
+    edadMinima: 3, edadMaxima: 12, edadTexto: "Todas las edades del centro",
+    validarEdad: false, plazasTotales: 25, plazasOcupadas: 12,
+    precioCents: 11000, icono: _lucidereact.Home, color: "teal",
+  },
+  {
+    id: "5", tipo: "acogida", nombre: "Servicio de Acogida (2 horas)", dia: "Lunes a Viernes",
+    descripcion:
+      "Versión ampliada del servicio de acogida: merienda, juego libre, apoyo con deberes y actividades supervisadas hasta las 17:30. La opción perfecta para jornadas laborales largas.",
+    horario: "15:30 – 17:30", frecuencia: "De lunes a viernes, todos los días lectivos",
+    edadMinima: 3, edadMaxima: 12, edadTexto: "Todas las edades del centro",
+    validarEdad: false, plazasTotales: 25, plazasOcupadas: 18,
+    precioCents: 16000, icono: _lucidereact.Sun, color: "teal",
+  },
+];
+
+const COLORES = {
+  rose: { badge: "bg-rose-100 text-rose-800", icon: "bg-rose-500" },
+  indigo: { badge: "bg-indigo-100 text-indigo-800", icon: "bg-indigo-500" },
+  amber: { badge: "bg-amber-100 text-amber-800", icon: "bg-amber-500" },
+  teal: { badge: "bg-teal-100 text-teal-800", icon: "bg-teal-600" },
+};
+
+const formatoPrecio = (cents) =>
+  (cents / 100).toLocaleString("es-ES", { style: "currency", currency: "EUR" });
+
+// ---------- POLÍTICA DE PRIVACIDAD (plantilla — revisar con asesor legal y completar datos) ----------
+function ModalPrivacidad({ onCerrar }) {
+  return (
+    _react2.default.createElement('div', { className: "fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"       ,}
+      , _react2.default.createElement('div', { className: "max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-6 shadow-xl"       ,}
+        , _react2.default.createElement('div', { className: "mb-4 flex items-start justify-between"   ,}
+          , _react2.default.createElement('h2', { className: "text-xl font-extrabold text-neutral-900"  ,}, "Política de Privacidad"  )
+          , _react2.default.createElement('button', { onClick: onCerrar, className: "rounded-full p-1 hover:bg-neutral-100"  ,}
+            , _react2.default.createElement(_lucidereact.X, { className: "h-5 w-5 text-neutral-500"  ,} )
+          )
+        )
+        , _react2.default.createElement('div', { className: "space-y-4 text-sm text-neutral-600"  ,}
+          , _react2.default.createElement('div', { className: "rounded-lg bg-amber-50 p-3 text-xs text-amber-800"    ,}, "⚠️ PLANTILLA — Completar con los datos reales de la empresa y revisar con un asesor legal antes de publicar."
+
+
+          )
+
+          , _react2.default.createElement('section', null
+            , _react2.default.createElement('h3', { className: "font-bold text-neutral-900" ,}, "1. Responsable del tratamiento"   )
+            , _react2.default.createElement('p', null
+              , _react2.default.createElement('strong', null, "ToBe Experiences" ), " [razón social completa], con NIF [•], domicilio en [•] y correo electrónico de contacto [•] (en adelante, el \"Responsable\"), es responsable del tratamiento de los datos personales recogidos a través de este sitio web."
+
+
+
+            )
+          )
+
+          , _react2.default.createElement('section', null
+            , _react2.default.createElement('h3', { className: "font-bold text-neutral-900" ,}, "2. Datos que tratamos"   )
+            , _react2.default.createElement('p', null, "A través del formulario de inscripción recogemos:"      )
+            , _react2.default.createElement('ul', { className: "ml-4 mt-1 list-disc space-y-1"   ,}
+              , _react2.default.createElement('li', null, _react2.default.createElement('strong', null, "Del menor:" ), " nombre y apellidos, fecha de nacimiento y, en su caso, información sobre alergias, medicación o necesidades especiales (datos de salud, tratados únicamente para garantizar su seguridad durante las actividades)."                             )
+              , _react2.default.createElement('li', null, _react2.default.createElement('strong', null, "Del padre/madre/tutor legal:"  ), " nombre y apellidos, correo electrónico y teléfono."       )
+              , _react2.default.createElement('li', null, _react2.default.createElement('strong', null, "Datos de pago:"  ), " el pago se procesa a través de "        , _react2.default.createElement('strong', null, "Stripe Payments Europe, Ltd."   ), " Nosotros no almacenamos en ningún momento los datos completos de tu tarjeta."            )
+            )
+          )
+
+          , _react2.default.createElement('section', null
+            , _react2.default.createElement('h3', { className: "font-bold text-neutral-900" ,}, "3. Finalidades y legitimación"   )
+            , _react2.default.createElement('ul', { className: "ml-4 mt-1 list-disc space-y-1"   ,}
+              , _react2.default.createElement('li', null, _react2.default.createElement('strong', null, "Gestionar la inscripción y prestación de la actividad"       ), " (ejecución del contrato — art. 6.1.b RGPD)."       )
+              , _react2.default.createElement('li', null, _react2.default.createElement('strong', null, "Gestionar el cobro de la cuota mensual"      ), " mediante suscripción a través de Stripe (ejecución del contrato)."         )
+              , _react2.default.createElement('li', null, _react2.default.createElement('strong', null, "Atender los datos de salud del menor"      ), " facilitados voluntariamente, para proteger sus intereses vitales y con el consentimiento explícito del tutor (arts. 9.2.a y 9.2.c RGPD)."                   )
+              , _react2.default.createElement('li', null, _react2.default.createElement('strong', null, "Enviar comunicaciones operativas"  ), " sobre la actividad: confirmaciones, recordatorios, avisos de lista de espera, cambios de horario (ejecución del contrato)."                )
+              , _react2.default.createElement('li', null, _react2.default.createElement('strong', null, "Captación y uso de imágenes del menor"      ), " en actividades, para su difusión en la web y redes sociales del Responsable: únicamente si el tutor lo autoriza expresamente marcando la casilla correspondiente (consentimiento — art. 6.1.a RGPD y LO 1/1982). Este consentimiento es "                                    , _react2.default.createElement('strong', null, "voluntario y revocable"  ), " en cualquier momento sin que afecte a la inscripción."         )
+            )
+          )
+
+          , _react2.default.createElement('section', null
+            , _react2.default.createElement('h3', { className: "font-bold text-neutral-900" ,}, "4. Menores de edad"   )
+            , _react2.default.createElement('p', null, "Los datos de menores se recogen únicamente a través de su padre, madre o tutor legal, quien declara ostentar la patria potestad o tutela y consiente el tratamiento en nombre del menor. Los datos se utilizan exclusivamente para las finalidades descritas y nunca con fines publicitarios dirigidos al menor."
+
+
+
+
+
+            )
+          )
+
+          , _react2.default.createElement('section', null
+            , _react2.default.createElement('h3', { className: "font-bold text-neutral-900" ,}, "5. Destinatarios" )
+            , _react2.default.createElement('p', null, "Los datos se comunican únicamente a los proveedores necesarios para prestar el servicio, que actúan como encargados de tratamiento:"                  )
+            , _react2.default.createElement('ul', { className: "ml-4 mt-1 list-disc space-y-1"   ,}
+              , _react2.default.createElement('li', null, _react2.default.createElement('strong', null, "Stripe Payments Europe, Ltd."   ), " (procesamiento de pagos)."   )
+              , _react2.default.createElement('li', null, "[Proveedor de hosting, ej. Vercel Inc.] (alojamiento web)."       )
+              , _react2.default.createElement('li', null, "[Proveedor de email, ej. Resend] (envío de comunicaciones)."       )
+            )
+            , _react2.default.createElement('p', { className: "mt-1",}, "Algunos proveedores pueden estar ubicados fuera del EEE; en tal caso, las transferencias se amparan en Cláusulas Contractuales Tipo aprobadas por la Comisión Europea u otras garantías adecuadas. No se ceden datos a terceros con fines comerciales."
+
+
+
+
+            )
+          )
+
+          , _react2.default.createElement('section', null
+            , _react2.default.createElement('h3', { className: "font-bold text-neutral-900" ,}, "6. Conservación" )
+            , _react2.default.createElement('p', null, "Los datos se conservan mientras dure la inscripción y, tras su finalización, durante los plazos legales aplicables (obligaciones fiscales y contables: hasta 6 años, art. 30 Código de Comercio). Las imágenes autorizadas se conservan hasta que se revoque el consentimiento."
+
+
+
+
+            )
+          )
+
+          , _react2.default.createElement('section', null
+            , _react2.default.createElement('h3', { className: "font-bold text-neutral-900" ,}, "7. Derechos" )
+            , _react2.default.createElement('p', null, "Puedes ejercer tus derechos de acceso, rectificación, supresión, oposición, limitación y portabilidad, así como retirar los consentimientos otorgados, escribiendo a [email de contacto] con el asunto \"Protección de datos\". También puedes reclamar ante la Agencia Española de Protección de Datos (www.aepd.es)."
+
+
+
+
+
+            )
+          )
+
+          , _react2.default.createElement('section', null
+            , _react2.default.createElement('h3', { className: "font-bold text-neutral-900" ,}, "8. Seguridad" )
+            , _react2.default.createElement('p', null, "Aplicamos medidas técnicas y organizativas apropiadas: comunicación cifrada (HTTPS), acceso restringido a los datos y procesamiento de pagos certificado PCI-DSS a través de Stripe."
+
+
+
+            )
+          )
+        )
+        , _react2.default.createElement('button', {
+          onClick: onCerrar,
+          className: "mt-6 w-full rounded-xl bg-neutral-900 py-3 font-bold text-white hover:bg-neutral-700"       ,}
+, "Cerrar"
+
+        )
+      )
+    )
+  );
+}
+
+// ---------- COMPONENTES ----------
+function BadgePlazas({ libres }) {
+  if (libres <= 0)
+    return (
+      _react2.default.createElement('span', { className: "inline-flex items-center gap-1 rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700"         ,}
+        , _react2.default.createElement(_lucidereact.AlertCircle, { className: "h-3 w-3" ,} ), " Completo · Lista de espera"
+      )
+    );
+  if (libres <= 3)
+    return (
+      _react2.default.createElement('span', { className: "inline-flex items-center gap-1 rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold text-orange-700"         ,}
+        , _react2.default.createElement(_lucidereact.Users, { className: "h-3 w-3" ,} ), " ¡Últimas "  , libres, " plazas!"
+      )
+    );
+  return (
+    _react2.default.createElement('span', { className: "inline-flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700"         ,}
+      , _react2.default.createElement(_lucidereact.Users, { className: "h-3 w-3" ,} ), " " , libres, " plazas libres"
+    )
+  );
+}
+
+function BotonPrincipal({ children, onClick }) {
+  return (
+    _react2.default.createElement('button', {
+      onClick: onClick,
+      className: "w-full rounded-xl bg-neutral-900 px-6 py-3.5 font-bold text-white shadow-sm transition hover:bg-neutral-700"         ,}
+
+      , children
+    )
+  );
+}
+
+function TarjetaActividad({ a, onClick }) {
+  const libres = a.plazasTotales - a.plazasOcupadas;
+  const c = COLORES[a.color];
+  const Icono = a.icono;
+  return (
+    _react2.default.createElement('button', {
+      onClick: onClick,
+      className: "w-full rounded-2xl border border-neutral-200 bg-white p-5 text-left shadow-sm transition hover:border-neutral-400 hover:shadow-md"          ,}
+
+      , _react2.default.createElement('div', { className: "flex items-start gap-4"  ,}
+        , _react2.default.createElement('div', { className: `flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${c.icon} text-white`,}
+          , _react2.default.createElement(Icono, { className: "h-6 w-6" ,} )
+        )
+        , _react2.default.createElement('div', { className: "min-w-0 flex-1" ,}
+          , _react2.default.createElement('div', { className: "flex flex-wrap items-center gap-2"   ,}
+            , _react2.default.createElement('span', { className: `rounded-full px-2 py-0.5 text-xs font-medium ${c.badge}`,}, a.dia)
+            , _react2.default.createElement(BadgePlazas, { libres: libres,} )
+          )
+          , _react2.default.createElement('h3', { className: "mt-1.5 font-bold text-neutral-900"  ,}, a.nombre)
+          , _react2.default.createElement('div', { className: "mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-sm text-neutral-500"      ,}
+            , _react2.default.createElement('span', { className: "inline-flex items-center gap-1"  ,}, _react2.default.createElement(_lucidereact.Clock, { className: "h-3.5 w-3.5" ,} ), " " , a.horario)
+            , _react2.default.createElement('span', { className: "inline-flex items-center gap-1"  ,}, _react2.default.createElement(_lucidereact.Baby, { className: "h-3.5 w-3.5" ,} ), " " , a.edadTexto)
+          )
+        )
+        , _react2.default.createElement('div', { className: "shrink-0 text-right" ,}
+          , _react2.default.createElement('div', { className: "text-lg font-extrabold text-neutral-900"  ,}, formatoPrecio(a.precioCents))
+          , _react2.default.createElement('div', { className: "text-xs text-neutral-400" ,}, "/mes")
+        )
+      )
+    )
+  );
+}
+
+function Landing({ actividades, onVerDetalle }) {
+  const extraescolares = actividades.filter((a) => a.tipo === "actividad");
+  const acogida = actividades.filter((a) => a.tipo === "acogida");
+  return (
+    _react2.default.createElement('div', null
+      , _react2.default.createElement('div', { className: "bg-neutral-950 px-6 py-14 text-center text-white"    ,}
+        , _react2.default.createElement('div', { className: "flex justify-center" ,}, _react2.default.createElement(LogoToBe, { claro: true, grande: true,} ))
+        , _react2.default.createElement('h1', { className: "mt-6 text-3xl font-extrabold sm:text-4xl"   ,}, "Actividades Extraescolares" )
+        , _react2.default.createElement('p', { className: "mx-auto mt-3 max-w-md text-neutral-400"   ,}, "Curso 2026 – 2027 · Cuota mensual con cargo automático. Inscripción online en 2 minutos."
+
+
+        )
+      )
+
+      , _react2.default.createElement('div', { className: "mx-auto max-w-3xl px-4 py-8"   ,}
+        , _react2.default.createElement('h2', { className: "mb-4 text-lg font-bold text-neutral-900"   ,}, "Actividades semanales" )
+        , _react2.default.createElement('div', { className: "space-y-4",}
+          , extraescolares.map((a) => (
+            _react2.default.createElement(TarjetaActividad, { key: a.id, a: a, onClick: () => onVerDetalle(a),} )
+          ))
+        )
+
+        , _react2.default.createElement('h2', { className: "mb-4 mt-10 text-lg font-bold text-neutral-900"    ,}, "Servicios de acogida"  )
+        , _react2.default.createElement('p', { className: "-mt-2 mb-4 text-sm text-neutral-500"   ,}, "Ampliación de horario diaria, de lunes a viernes, para conciliar con tu jornada laboral."
+
+        )
+        , _react2.default.createElement('div', { className: "space-y-4",}
+          , acogida.map((a) => (
+            _react2.default.createElement(TarjetaActividad, { key: a.id, a: a, onClick: () => onVerDetalle(a),} )
+          ))
+        )
+
+        , _react2.default.createElement('div', { className: "mt-8 flex items-start gap-3 rounded-xl border border-neutral-200 bg-white p-4 text-sm text-neutral-600"          ,}
+          , _react2.default.createElement(_lucidereact.Repeat, { className: "mt-0.5 h-4 w-4 shrink-0 text-neutral-400"    ,} )
+          , _react2.default.createElement('span', null, "La cuota se cobra "
+                , _react2.default.createElement('strong', null, "automáticamente cada mes"  ), " a la tarjeta que indiques al inscribirte. La suscripción termina sola al acabar el curso (junio) y puedes darte de baja al final de cualquier mes."
+
+
+          )
+        )
+      )
+    )
+  );
+}
+
+function Detalle({ actividad, onVolver, onInscribirse }) {
+  const libres = actividad.plazasTotales - actividad.plazasOcupadas;
+  const c = COLORES[actividad.color];
+  const Icono = actividad.icono;
+  const porcentaje = Math.round((actividad.plazasOcupadas / actividad.plazasTotales) * 100);
+
+  return (
+    _react2.default.createElement('div', { className: "mx-auto max-w-3xl px-4 py-6"   ,}
+      , _react2.default.createElement('button', { onClick: onVolver,
+        className: "mb-4 inline-flex items-center gap-1 text-sm font-medium text-neutral-500 hover:text-neutral-900"       ,}
+        , _react2.default.createElement(_lucidereact.ChevronLeft, { className: "h-4 w-4" ,} ), " Volver"
+      )
+
+      , _react2.default.createElement('div', { className: "overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm"     ,}
+        , _react2.default.createElement('div', { className: "bg-neutral-950 px-6 py-8 text-white"   ,}
+          , _react2.default.createElement('div', { className: `inline-flex h-12 w-12 items-center justify-center rounded-xl ${c.icon}`,}
+            , _react2.default.createElement(Icono, { className: "h-6 w-6" ,} )
+          )
+          , _react2.default.createElement('h1', { className: "mt-3 text-2xl font-extrabold"  ,}, actividad.nombre)
+          , _react2.default.createElement('p', { className: "mt-1 text-sm text-neutral-400"  ,}, actividad.frecuencia, " · "  , actividad.horario)
+        )
+
+        , _react2.default.createElement('div', { className: "p-6",}
+          , _react2.default.createElement('p', { className: "text-neutral-600",}, actividad.descripcion)
+
+          , _react2.default.createElement('div', { className: "mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4"    ,}
+            , _react2.default.createElement('div', { className: "rounded-xl bg-neutral-50 p-3"  ,}
+              , _react2.default.createElement(_lucidereact.Calendar, { className: "h-4 w-4 text-neutral-400"  ,} )
+              , _react2.default.createElement('div', { className: "mt-1 text-xs text-neutral-500"  ,}, "Días")
+              , _react2.default.createElement('div', { className: "text-sm font-semibold text-neutral-800"  ,}, actividad.dia)
+            )
+            , _react2.default.createElement('div', { className: "rounded-xl bg-neutral-50 p-3"  ,}
+              , _react2.default.createElement(_lucidereact.Clock, { className: "h-4 w-4 text-neutral-400"  ,} )
+              , _react2.default.createElement('div', { className: "mt-1 text-xs text-neutral-500"  ,}, "Horario")
+              , _react2.default.createElement('div', { className: "text-sm font-semibold text-neutral-800"  ,}, actividad.horario)
+            )
+            , _react2.default.createElement('div', { className: "rounded-xl bg-neutral-50 p-3"  ,}
+              , _react2.default.createElement(_lucidereact.Baby, { className: "h-4 w-4 text-neutral-400"  ,} )
+              , _react2.default.createElement('div', { className: "mt-1 text-xs text-neutral-500"  ,}, "Edades")
+              , _react2.default.createElement('div', { className: "text-sm font-semibold text-neutral-800"  ,}, actividad.edadTexto)
+            )
+            , _react2.default.createElement('div', { className: "rounded-xl bg-neutral-50 p-3"  ,}
+              , _react2.default.createElement(_lucidereact.CreditCard, { className: "h-4 w-4 text-neutral-400"  ,} )
+              , _react2.default.createElement('div', { className: "mt-1 text-xs text-neutral-500"  ,}, "Cuota")
+              , _react2.default.createElement('div', { className: "text-sm font-semibold text-neutral-800"  ,}
+                , formatoPrecio(actividad.precioCents), "/mes"
+              )
+            )
+          )
+
+          , _react2.default.createElement('div', { className: "mt-6",}
+            , _react2.default.createElement('div', { className: "mb-1 flex items-center justify-between text-sm"    ,}
+              , _react2.default.createElement('span', { className: "font-medium text-neutral-600" ,}, "Ocupación")
+              , _react2.default.createElement(BadgePlazas, { libres: libres,} )
+            )
+            , _react2.default.createElement('div', { className: "h-2.5 w-full overflow-hidden rounded-full bg-neutral-100"    ,}
+              , _react2.default.createElement('div', {
+                className: `h-full rounded-full transition-all ${
+                  libres <= 0 ? "bg-red-500" : libres <= 3 ? "bg-orange-400" : "bg-green-500"
+                }`,
+                style: { width: `${porcentaje}%` },}
+              )
+            )
+            , _react2.default.createElement('div', { className: "mt-1 text-xs text-neutral-400"  ,}
+              , actividad.plazasOcupadas, " de "  , actividad.plazasTotales, " plazas ocupadas"
+            )
+          )
+
+          , _react2.default.createElement('div', { className: "mt-6",}
+            , _react2.default.createElement(BotonPrincipal, { onClick: onInscribirse,}
+              , libres <= 0 ? "Apuntarse a la lista de espera" : "Inscribir a mi peque"
+            )
+          )
+        )
+      )
+    )
+  );
+}
+
+function Formulario({ actividad, onVolver, onEnviar }) {
+  const libres = actividad.plazasTotales - actividad.plazasOcupadas;
+  const [form, setForm] = _react.useState.call(void 0, {
+    nombreNino: "", fechaNacimiento: "", observaciones: "",
+    nombreTutor: "", email: "", telefono: "",
+    rgpd: false, usoImagenes: false,
+  });
+  const [errores, setErrores] = _react.useState.call(void 0, {});
+  const [verPrivacidad, setVerPrivacidad] = _react.useState.call(void 0, false);
+
+  const set = (campo) => (e) =>
+    setForm({ ...form, [campo]: e.target.type === "checkbox" ? e.target.checked : e.target.value });
+
+  const validar = () => {
+    const err = {};
+    if (!form.nombreNino.trim()) err.nombreNino = "Obligatorio";
+    if (!form.fechaNacimiento) err.fechaNacimiento = "Obligatorio";
+    else if (actividad.validarEdad) {
+      const nac = new Date(form.fechaNacimiento);
+      const hoy = new Date();
+      let edad = hoy.getFullYear() - nac.getFullYear();
+      const m = hoy.getMonth() - nac.getMonth();
+      if (m < 0 || (m === 0 && hoy.getDate() < nac.getDate())) edad--;
+      if (edad < actividad.edadMinima || edad > actividad.edadMaxima)
+        err.fechaNacimiento = `Esta actividad es para niños/as de ${actividad.edadMinima} a ${actividad.edadMaxima} años (edad calculada: ${edad})`;
+    }
+    if (!form.nombreTutor.trim()) err.nombreTutor = "Obligatorio";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) err.email = "Email no válido";
+    if (!form.telefono.trim()) err.telefono = "Obligatorio";
+    if (!form.rgpd) err.rgpd = "Debes aceptar la política de privacidad para continuar";
+    return err;
+  };
+
+  const enviar = () => {
+    const err = validar();
+    setErrores(err);
+    if (Object.keys(err).length === 0) onEnviar(form);
+  };
+
+  const inputCls = (campo) =>
+    `w-full rounded-lg border px-3 py-2.5 text-sm outline-none transition focus:ring-2 focus:ring-neutral-800 ${
+      errores[campo] ? "border-red-400 bg-red-50" : "border-neutral-300 bg-white"
+    }`;
+
+  return (
+    _react2.default.createElement('div', { className: "mx-auto max-w-xl px-4 py-6"   ,}
+      , verPrivacidad && _react2.default.createElement(ModalPrivacidad, { onCerrar: () => setVerPrivacidad(false),} )
+
+      , _react2.default.createElement('button', { onClick: onVolver,
+        className: "mb-4 inline-flex items-center gap-1 text-sm font-medium text-neutral-500 hover:text-neutral-900"       ,}
+        , _react2.default.createElement(_lucidereact.ChevronLeft, { className: "h-4 w-4" ,} ), " Volver"
+      )
+
+      , _react2.default.createElement('div', { className: "rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm"     ,}
+        , _react2.default.createElement('h1', { className: "text-xl font-extrabold text-neutral-900"  ,}, "Inscripción · "  , actividad.nombre)
+        , _react2.default.createElement('p', { className: "mt-0.5 text-sm text-neutral-500"  ,}
+          , actividad.frecuencia, " · "  , actividad.horario, " · "  , formatoPrecio(actividad.precioCents), "/mes"
+        )
+        , libres <= 0 ? (
+          _react2.default.createElement('div', { className: "mt-3 flex items-start gap-2 rounded-lg bg-amber-50 p-3 text-sm text-amber-800"        ,}
+            , _react2.default.createElement(_lucidereact.AlertCircle, { className: "mt-0.5 h-4 w-4 shrink-0"   ,} )
+            , _react2.default.createElement('span', null, "Actividad "
+               , _react2.default.createElement('strong', null, "completa"), ". Al enviar entrarás en la"     , " "
+              , _react2.default.createElement('strong', null, "lista de espera"  ), " y te avisaremos si se libera una plaza."
+            )
+          )
+        ) : (
+          _react2.default.createElement('p', { className: "mt-2 text-sm text-neutral-500"  ,}, "Al enviar, reservamos la plaza 30 minutos mientras completas el alta de la cuota mensual (cargo automático cada mes)."
+
+
+          )
+        )
+
+        , _react2.default.createElement('h2', { className: "mt-6 mb-3 text-sm font-bold uppercase tracking-wide text-neutral-400"      ,}, "Datos del niño/a"
+
+        )
+        , _react2.default.createElement('div', { className: "space-y-4",}
+          , _react2.default.createElement('div', null
+            , _react2.default.createElement('label', { className: "mb-1 block text-sm font-medium text-neutral-700"    ,}, "Nombre y apellidos"  )
+            , _react2.default.createElement('input', { className: inputCls("nombreNino"), value: form.nombreNino,
+              onChange: set("nombreNino"), placeholder: "Ej. Lucía Martín"  ,} )
+            , errores.nombreNino && _react2.default.createElement('p', { className: "mt-1 text-xs text-red-600"  ,}, errores.nombreNino)
+          )
+          , _react2.default.createElement('div', null
+            , _react2.default.createElement('label', { className: "mb-1 block text-sm font-medium text-neutral-700"    ,}, "Fecha de nacimiento"  )
+            , _react2.default.createElement('input', { type: "date", className: inputCls("fechaNacimiento"),
+              value: form.fechaNacimiento, onChange: set("fechaNacimiento"),} )
+            , errores.fechaNacimiento && (
+              _react2.default.createElement('p', { className: "mt-1 text-xs text-red-600"  ,}, errores.fechaNacimiento)
+            )
+          )
+          , _react2.default.createElement('div', null
+            , _react2.default.createElement('label', { className: "mb-1 block text-sm font-medium text-neutral-700"    ,}, "Alergias, medicación o necesidades especiales"
+                  , " "
+              , _react2.default.createElement('span', { className: "font-normal text-neutral-400" ,}, "(opcional)")
+            )
+            , _react2.default.createElement('textarea', { rows: 2, className: inputCls("observaciones"), value: form.observaciones,
+              onChange: set("observaciones"), placeholder: "Ej. alergia a los frutos secos"     ,} )
+          )
+        )
+
+        , _react2.default.createElement('h2', { className: "mt-6 mb-3 text-sm font-bold uppercase tracking-wide text-neutral-400"      ,}, "Datos del padre/madre/tutor"
+
+        )
+        , _react2.default.createElement('div', { className: "space-y-4",}
+          , _react2.default.createElement('div', null
+            , _react2.default.createElement('label', { className: "mb-1 block text-sm font-medium text-neutral-700"    ,}, "Nombre completo" )
+            , _react2.default.createElement('input', { className: inputCls("nombreTutor"), value: form.nombreTutor,
+              onChange: set("nombreTutor"), placeholder: "Ej. Carmen Martín López"   ,} )
+            , errores.nombreTutor && _react2.default.createElement('p', { className: "mt-1 text-xs text-red-600"  ,}, errores.nombreTutor)
+          )
+          , _react2.default.createElement('div', { className: "grid gap-4 sm:grid-cols-2"  ,}
+            , _react2.default.createElement('div', null
+              , _react2.default.createElement('label', { className: "mb-1 block text-sm font-medium text-neutral-700"    ,}, "Email")
+              , _react2.default.createElement('input', { type: "email", className: inputCls("email"), value: form.email,
+                onChange: set("email"), placeholder: "carmen@email.com",} )
+              , errores.email && _react2.default.createElement('p', { className: "mt-1 text-xs text-red-600"  ,}, errores.email)
+            )
+            , _react2.default.createElement('div', null
+              , _react2.default.createElement('label', { className: "mb-1 block text-sm font-medium text-neutral-700"    ,}, "Teléfono")
+              , _react2.default.createElement('input', { type: "tel", className: inputCls("telefono"), value: form.telefono,
+                onChange: set("telefono"), placeholder: "600 123 456"  ,} )
+              , errores.telefono && _react2.default.createElement('p', { className: "mt-1 text-xs text-red-600"  ,}, errores.telefono)
+            )
+          )
+        )
+
+        , _react2.default.createElement('h2', { className: "mt-6 mb-3 text-sm font-bold uppercase tracking-wide text-neutral-400"      ,}, "Consentimientos"
+
+        )
+
+        /* RGPD — obligatoria */
+        , _react2.default.createElement('label', { className: `flex cursor-pointer items-start gap-3 rounded-lg border p-3 text-sm ${
+          errores.rgpd ? "border-red-300 bg-red-50" : "border-neutral-200 bg-neutral-50"
+        }`,}
+          , _react2.default.createElement('input', { type: "checkbox", checked: form.rgpd, onChange: set("rgpd"),
+            className: "mt-0.5 h-4 w-4 rounded"   ,} )
+          , _react2.default.createElement('span', { className: "text-neutral-600",}
+            , _react2.default.createElement('span', { className: "font-semibold text-red-500" ,}, "*"), " He leído y acepto la"     , " "
+            , _react2.default.createElement('button', { type: "button", onClick: (e) => { e.preventDefault(); setVerPrivacidad(true); },
+              className: "font-semibold underline" ,}, "política de privacidad"
+
+            ), " ", "y consiento el tratamiento de los datos de mi hijo/a para la gestión de esta actividad y el cobro mensual de la cuota."
+
+
+          )
+        )
+        , errores.rgpd && _react2.default.createElement('p', { className: "mt-1 text-xs text-red-600"  ,}, errores.rgpd)
+
+        /* Uso de imágenes — opcional */
+        , _react2.default.createElement('label', { className: "mt-3 flex cursor-pointer items-start gap-3 rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-sm"          ,}
+          , _react2.default.createElement('input', { type: "checkbox", checked: form.usoImagenes, onChange: set("usoImagenes"),
+            className: "mt-0.5 h-4 w-4 rounded"   ,} )
+          , _react2.default.createElement('span', { className: "text-neutral-600",}
+            , _react2.default.createElement(_lucidereact.Camera, { className: "mr-1 inline h-4 w-4 text-neutral-400"    ,} )
+            , _react2.default.createElement('strong', null, "(Opcional)"), " Autorizo la captación de imágenes de mi hijo/a durante las actividades y su publicación en la página web y redes sociales de ToBe Experiences. Puedo revocar esta autorización en cualquier momento sin que afecte a la inscripción."
+
+
+
+          )
+        )
+
+        , _react2.default.createElement('div', { className: "mt-6",}
+          , _react2.default.createElement(BotonPrincipal, { onClick: enviar,}
+            , libres <= 0
+              ? "Apuntarme a la lista de espera"
+              : `Continuar al pago · ${formatoPrecio(actividad.precioCents)}/mes`
+          )
+        )
+      )
+    )
+  );
+}
+
+function PagoSimulado({ actividad, form, onPagar, onCancelar }) {
+  return (
+    _react2.default.createElement('div', { className: "mx-auto max-w-md px-4 py-10"   ,}
+      , _react2.default.createElement('div', { className: "rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm"     ,}
+        , _react2.default.createElement('div', { className: "mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-neutral-400"        ,}
+          , _react2.default.createElement(_lucidereact.CreditCard, { className: "h-4 w-4" ,} ), " Stripe Checkout (simulado)"
+        )
+        , _react2.default.createElement('h1', { className: "text-lg font-bold text-neutral-900"  ,}, actividad.nombre)
+        , _react2.default.createElement('p', { className: "mt-1 text-sm text-neutral-500"  ,}, "Inscripción de "
+            , form.nombreNino, " · "  , actividad.horario
+        )
+        , _react2.default.createElement('div', { className: "mt-4 flex items-baseline justify-between border-t border-neutral-100 pt-4"      ,}
+          , _react2.default.createElement('span', { className: "text-sm text-neutral-500" ,}, "Cuota mensual" )
+          , _react2.default.createElement('span', { className: "text-2xl font-extrabold text-neutral-900"  ,}
+            , formatoPrecio(actividad.precioCents)
+            , _react2.default.createElement('span', { className: "text-sm font-medium text-neutral-400"  ,}, "/mes")
+          )
+        )
+        , _react2.default.createElement('div', { className: "mt-4 rounded-lg bg-blue-50 p-3 text-xs text-blue-700"     ,}, "El recibo se cargará "
+              , _react2.default.createElement('strong', null, "automáticamente cada mes"  ), " a esta tarjeta. La suscripción se cancela sola al terminar el curso (junio) y puedes darte de baja antes en cualquier momento. Plaza reservada durante "
+
+                  , _react2.default.createElement('strong', null, "30 minutos" ), "."
+        )
+        , _react2.default.createElement('button', { onClick: onPagar,
+          className: "mt-5 w-full rounded-xl bg-indigo-600 px-6 py-3 font-bold text-white transition hover:bg-indigo-700"         ,}, "Suscribirme · "
+            , formatoPrecio(actividad.precioCents), "/mes"
+        )
+        , _react2.default.createElement('button', { onClick: onCancelar,
+          className: "mt-2 w-full rounded-xl px-6 py-2.5 text-sm font-medium text-neutral-500 hover:text-neutral-800"        ,}, "Cancelar (simula que expira la reserva)"
+
+        )
+      )
+    )
+  );
+}
+
+function Confirmacion({ actividad, form, onInicio }) {
+  return (
+    _react2.default.createElement('div', { className: "mx-auto max-w-md px-4 py-12 text-center"    ,}
+      , _react2.default.createElement('div', { className: "mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100"       ,}
+        , _react2.default.createElement(_lucidereact.CheckCircle2, { className: "h-9 w-9 text-green-600"  ,} )
+      )
+      , _react2.default.createElement('h1', { className: "mt-4 text-2xl font-extrabold text-neutral-900"   ,}, "¡Inscripción confirmada!" )
+      , _react2.default.createElement('p', { className: "mt-2 text-neutral-600" ,}
+        , _react2.default.createElement('strong', null, form.nombreNino), " tiene su plaza en"    , " "
+        , _react2.default.createElement('strong', null, actividad.nombre), " (" , actividad.frecuencia.toLowerCase(), ",", " "
+        , actividad.horario, ")."
+      )
+      , form.usoImagenes && (
+        _react2.default.createElement('p', { className: "mt-2 text-sm text-neutral-500"  ,}, "📷 Autorización de imágenes registrada. Puedes revocarla cuando quieras."
+
+        )
+      )
+      , _react2.default.createElement('div', { className: "mt-4 inline-flex items-center gap-2 rounded-lg bg-neutral-100 px-4 py-2 text-sm text-neutral-600"         ,}
+        , _react2.default.createElement(_lucidereact.Mail, { className: "h-4 w-4" ,} ), " Confirmación enviada a "    , form.email
+      )
+      , _react2.default.createElement('div', { className: "mx-auto mt-8 max-w-[200px]"  ,}
+        , _react2.default.createElement(BotonPrincipal, { onClick: onInicio,}, "Volver al inicio"  )
+      )
+    )
+  );
+}
+
+function ListaEspera({ actividad, form, posicion, onInicio }) {
+  return (
+    _react2.default.createElement('div', { className: "mx-auto max-w-md px-4 py-12 text-center"    ,}
+      , _react2.default.createElement('div', { className: "mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-100"       ,}
+        , _react2.default.createElement(_lucidereact.ListOrdered, { className: "h-9 w-9 text-amber-600"  ,} )
+      )
+      , _react2.default.createElement('h1', { className: "mt-4 text-2xl font-extrabold text-neutral-900"   ,}, "Estás en lista de espera"    )
+      , _react2.default.createElement('p', { className: "mt-2 text-neutral-600" ,}
+        , _react2.default.createElement('strong', null, form.nombreNino), " ocupa la posición"   , " "
+        , _react2.default.createElement('span', { className: "font-extrabold text-amber-600" ,}, "#", posicion), " en" , " "
+        , _react2.default.createElement('strong', null, actividad.nombre), "."
+      )
+      , _react2.default.createElement('p', { className: "mt-3 text-sm text-neutral-500"  ,}, "Si se libera una plaza te enviaremos un email a "
+                  , _react2.default.createElement('strong', null, form.email), " ", "con un enlace de pago válido durante 24 horas."
+
+      )
+      , _react2.default.createElement('div', { className: "mx-auto mt-8 max-w-[200px]"  ,}
+        , _react2.default.createElement(BotonPrincipal, { onClick: onInicio,}, "Volver al inicio"  )
+      )
+    )
+  );
+}
+
+// ---------- APP ----------
+ function ToBeApp() {
+  const [actividades, setActividades] = _react.useState.call(void 0, ACTIVIDADES_INICIALES);
+  const [vista, setVista] = _react.useState.call(void 0, "landing");
+  const [actividadSel, setActividadSel] = _react.useState.call(void 0, null);
+  const [formData, setFormData] = _react.useState.call(void 0, null);
+
+  const actividadActual = actividadSel
+    ? actividades.find((a) => a.id === actividadSel.id)
+    : null;
+
+  const irInicio = () => { setVista("landing"); setActividadSel(null); setFormData(null); };
+
+  const enviarFormulario = (form) => {
+    setFormData(form);
+    const libres = actividadActual.plazasTotales - actividadActual.plazasOcupadas;
+    if (libres > 0) {
+      setActividades((prev) =>
+        prev.map((a) => a.id === actividadActual.id ? { ...a, plazasOcupadas: a.plazasOcupadas + 1 } : a)
+      );
+      setVista("pago");
+    } else {
+      setVista("listaEspera");
+    }
+  };
+
+  const pagoCancelado = () => {
+    setActividades((prev) =>
+      prev.map((a) => a.id === actividadActual.id ? { ...a, plazasOcupadas: a.plazasOcupadas - 1 } : a)
+    );
+    setVista("detalle");
+  };
+
+  return (
+    _react2.default.createElement('div', { className: "min-h-screen bg-neutral-50 font-sans"  ,}
+      , _react2.default.createElement('header', { className: "sticky top-0 z-10 border-b border-neutral-200 bg-white/95 backdrop-blur"      ,}
+        , _react2.default.createElement('div', { className: "mx-auto flex max-w-3xl items-center justify-between px-4 py-2.5"      ,}
+          , _react2.default.createElement('button', { onClick: irInicio,}, _react2.default.createElement(LogoToBe, null ))
+          , _react2.default.createElement('span', { className: "rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-500"      ,}, "Prototipo MVP"
+
+          )
+        )
+      )
+
+      , vista === "landing" && (
+        _react2.default.createElement(Landing, { actividades: actividades,
+          onVerDetalle: (a) => { setActividadSel(a); setVista("detalle"); },} )
+      )
+      , vista === "detalle" && actividadActual && (
+        _react2.default.createElement(Detalle, { actividad: actividadActual, onVolver: irInicio,
+          onInscribirse: () => setVista("formulario"),} )
+      )
+      , vista === "formulario" && actividadActual && (
+        _react2.default.createElement(Formulario, { actividad: actividadActual,
+          onVolver: () => setVista("detalle"), onEnviar: enviarFormulario,} )
+      )
+      , vista === "pago" && actividadActual && formData && (
+        _react2.default.createElement(PagoSimulado, { actividad: actividadActual, form: formData,
+          onPagar: () => setVista("confirmacion"), onCancelar: pagoCancelado,} )
+      )
+      , vista === "confirmacion" && actividadActual && formData && (
+        _react2.default.createElement(Confirmacion, { actividad: actividadActual, form: formData, onInicio: irInicio,} )
+      )
+      , vista === "listaEspera" && actividadActual && formData && (
+        _react2.default.createElement(ListaEspera, { actividad: actividadActual, form: formData, posicion: 1, onInicio: irInicio,} )
+      )
+
+      , _react2.default.createElement('footer', { className: "mt-8 border-t border-neutral-200 py-6 text-center text-xs text-neutral-400"      ,}, "ToBe Experiences · Curso 2026–2027 · Prototipo con datos simulados"
+
+      )
+    )
+  );
+} exports.default = ToBeApp;
+</script></head>
+  <body>
+  
+
+<div id="preview-app"></div></body></html>
