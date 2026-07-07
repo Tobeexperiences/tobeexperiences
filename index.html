@@ -735,7 +735,19 @@ function ListaEspera({ actividad, form, posicion, onInicio }) {
   );
 } exports.default = ToBeApp;
 </script></head>
-  <body>
+ <div style="text-align:center;padding:16px;">
+  <a href="#" id="admin-link" style="font-size:11px;color:#a3a3a3;text-decoration:underline;">Acceso administración</a>
+</div>
+<script>
+document.getElementById('admin-link').addEventListener('click', function(e){
+  e.preventDefault();
+  var CLAVE_ADMIN = "tobe2026"; // ← Para cambiar la contraseña, edita esto
+  var intento = prompt("Contraseña de administración:");
+  if (intento === CLAVE_ADMIN) { location.href = "/panel.html"; }
+  else if (intento !== null) { alert("Contraseña incorrecta"); }
+});
+</script>
+    <body>
   
 
 <div id="preview-app"></div></body></html>
