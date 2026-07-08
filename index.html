@@ -138,7 +138,11 @@ function esAcogida(a){ return (a.categoria||"").toLowerCase().includes("acog") |
 function horarioDe(a){ return a.horario || ((a.hora_inicio&&a.hora_fin) ? a.hora_inicio.slice(0,5)+" – "+a.hora_fin.slice(0,5) : ""); }
 function edadDe(a){ if(a.edad_texto) return a.edad_texto; if(a.edad_min&&a.edad_max) return a.edad_min+" – "+a.edad_max+" años"; return "Grupos según edad y demanda"; }
 function libresDe(a){ return (a.plazas_totales ?? 0) - (a.plazas_ocupadas ?? 0); }
-
+function precioTexto(a){
+  if (a.precio_centavos != null) return (a.precio_centavos / 100).toFixed(2).replace(".", ",") + " €";
+  if (a.precio != null) return Number(a.precio).toFixed(2).replace(".", ",") + " €";
+  return "Consultar";
+}
 function seccion(titulo, lista){
   return `<h2>${titulo}</h2><div class="grid">` + lista.map(a => {
     const libres = libresDe(a);
@@ -151,7 +155,7 @@ function seccion(titulo, lista){
       <div class="meta">📅 ${a.dia || "Lunes a Viernes"} · ${horarioDe(a)}</div>
       <div class="desc">${a.descripcion || ""}</div>
       <div class="badges">👧 ${edadDe(a)}<br>${badge}</div>
-      <div class="precio">${Number(a.precio).toFixed(2).replace(".",",")} € <span>/ mes</span></div>
+      <div class="precio">${precioTexto(a)} <span>/ mes</span></div>
       <button class="inscribir" onclick="abrirModal(${a.id})" ${libres<=0?"disabled":""}>Inscribir a mi peque</button>
     </div>`;
   }).join("") + "</div>";
