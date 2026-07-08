@@ -139,8 +139,17 @@ function horarioDe(a){ return a.horario || ((a.hora_inicio&&a.hora_fin) ? a.hora
 function edadDe(a){ if(a.edad_texto) return a.edad_texto; if(a.edad_min&&a.edad_max) return a.edad_min+" – "+a.edad_max+" años"; return "Grupos según edad y demanda"; }
 function libresDe(a){ return (a.plazas_totales ?? 0) - (a.plazas_ocupadas ?? 0); }
 function precioTexto(a){
-  if (a.precio_centavos != null) return (a.precio_centavos / 100).toFixed(2).replace(".", ",") + " €";
-  if (a.precio != null) return Number(a.precio).toFixed(2).replace(".", ",") + " €";
+  // Busca cualquier columna cuyo nombre contenga "precio", "cuota", "importe" o "tarifa"
+  for (const k in a) {
+    const nombre = k.toLowerCase();
+    if (nombre.includes("precio") || nombre.includes("cuota") || nombre.includes("importe") || nombre.includes("tarifa")) {
+      const v = Number(a[k]);
+      if (!isNaN(v) && v > 0) {
+        const euros = v >= 500 ? v / 100 : v; // si es un número grande, son céntimos
+        return euros.toFixed(2).replace(".", ",") + " €";
+      }
+    }
+  }
   return "Consultar";
 }
 function seccion(titulo, lista){
