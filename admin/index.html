@@ -1,227 +1,367 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ToBe · Administración</title>
+<script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-  * { margin:0; padding:0; box-sizing:border-box; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
-  body { background:#f6f6f7; color:#111; }
-  /* Login */
-  .login-wrap { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; background:#0a0a0a; }
-  .login-box { background:#fff; border-radius:16px; padding:36px; max-width:380px; width:100%; }
-  .login-box .logo { font-size:34px; font-weight:900; font-style:italic; }
-  .login-box .logo small { font-style:normal; font-weight:600; letter-spacing:6px; font-size:11px; display:block; }
-  .login-box label { display:block; font-size:13px; font-weight:600; margin:16px 0 5px; }
-  .login-box input { width:100%; padding:11px; border:1px solid #ccc; border-radius:8px; font-size:15px; }
-  .login-box button { width:100%; margin-top:20px; background:#111; color:#fff; border:none; border-radius:9px; padding:13px; font-size:15px; font-weight:600; cursor:pointer; }
-  .login-box .error { color:#c00; font-size:13.5px; margin-top:12px; display:none; }
-  /* Panel */
-  #panel { display:none; }
-  header { background:#fff; border-bottom:1px solid #e5e5e5; padding:14px 24px; display:flex; align-items:center; gap:12px; }
-  header .logo { font-size:22px; font-weight:900; font-style:italic; }
-  header .badge { background:#111; color:#fff; font-size:11px; font-weight:700; padding:3px 9px; border-radius:6px; letter-spacing:1px; }
-  header .salir { margin-left:auto; background:none; border:none; color:#555; font-size:14px; cursor:pointer; }
-  nav { background:#fff; border-bottom:1px solid #e5e5e5; padding:0 24px; display:flex; gap:4px; overflow-x:auto; }
-  nav button { background:none; border:none; padding:13px 16px; font-size:14.5px; font-weight:600; color:#666; cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; }
-  nav button.activa { color:#111; border-bottom-color:#111; }
-  nav button .num { background:#111; color:#fff; border-radius:10px; font-size:11px; padding:1px 7px; margin-left:5px; }
-  main { max-width:1100px; margin:0 auto; padding:28px 20px 60px; }
-  h2 { font-size:21px; margin-bottom:18px; }
-  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:16px; margin-bottom:30px; }
-  .cardk { background:#fff; border:1px solid #e8e8e8; border-radius:14px; padding:20px; }
-  .cardk .icono { font-size:22px; }
-  .cardk .valor { font-size:30px; font-weight:800; margin-top:8px; }
-  .cardk .titulo { font-size:14px; font-weight:600; margin-top:2px; }
-  .cardk .sub { font-size:12.5px; color:#888; margin-top:2px; }
-  .seccion-t { font-size:12.5px; font-weight:700; letter-spacing:1px; color:#888; margin:26px 0 12px; }
-  .fila-act { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:16px 18px; margin-bottom:10px;
-              display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
-  .fila-act .nombre { font-weight:700; flex:1; min-width:150px; }
-  .fila-act .ocup { font-size:13.5px; color:#555; }
-  .fila-act .precio { font-weight:700; }
-  .barra { width:100%; height:7px; background:#eee; border-radius:4px; overflow:hidden; margin-top:8px; }
-  .barra div { height:100%; background:#0a7d3b; border-radius:4px; }
-  table { width:100%; background:#fff; border:1px solid #e8e8e8; border-radius:12px; border-collapse:separate; border-spacing:0; overflow:hidden; font-size:14px; }
-  th { text-align:left; padding:12px 14px; background:#fafafa; font-size:12.5px; color:#777; border-bottom:1px solid #eee; }
-  td { padding:12px 14px; border-bottom:1px solid #f2f2f2; vertical-align:top; }
-  tr:last-child td { border-bottom:none; }
-  .vista { display:none; }
-  .vista.activa { display:block; }
-  .vacio { color:#888; padding:30px 0; text-align:center; }
-  .tabla-scroll { overflow-x:auto; }
-</style>
 </head>
-<body>
-
-<!-- LOGIN -->
-<div class="login-wrap" id="login">
-  <div class="login-box">
-    <div class="logo">ToBe <small>EXPERIENCES · ADMIN</small></div>
-    <form id="formLogin">
-      <label>Email</label>
-      <input type="email" id="l_email" required>
-      <label>Contraseña</label>
-      <input type="password" id="l_pass" required>
-      <div class="error" id="l_error"></div>
-      <button type="submit">Entrar</button>
-    </form>
-  </div>
-</div>
-
-<!-- PANEL -->
-<div id="panel">
-  <header>
-    <span class="logo">ToBe</span><span class="badge">ADMIN</span>
-    <button class="salir" onclick="salir()">↪ Salir</button>
-  </header>
-  <nav>
-    <button class="activa" onclick="ver('dashboard', this)">Dashboard</button>
-    <button onclick="ver('inscripciones', this)">Inscripciones <span class="num" id="numIns">0</span></button>
-    <button onclick="ver('actividades', this)">Actividades</button>
-  </nav>
-  <main>
-    <div class="vista activa" id="v-dashboard">
-      <h2 id="tituloMes">Resumen</h2>
-      <div class="cards" id="tarjetas"></div>
-      <div class="seccion-t">OCUPACIÓN POR ACTIVIDAD</div>
-      <div id="ocupacion"></div>
-    </div>
-    <div class="vista" id="v-inscripciones">
-      <h2>Inscripciones</h2>
-      <div class="tabla-scroll"><div id="tablaIns"></div></div>
-    </div>
-    <div class="vista" id="v-actividades">
-      <h2>Actividades</h2>
-      <div class="tabla-scroll"><div id="tablaAct"></div></div>
-    </div>
-  </main>
-</div>
-
+<body class="bg-neutral-100 font-sans">
+<div id="app"></div>
 <script>
+/* ═══════════ CONFIG — usa los mismos valores que en tu web ═══════════ */
 const SUPABASE_URL = "https://fqjiqrcwvjejmurushsf.supabase.co";
-const SUPABASE_KEY = "sb_publishable_lAtrJRKGC4ysFiLu2bWCjQ_6A-X4FDN";
-const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxamlxcmN3dmplam11cnVzaHNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0ODI0OTcsImV4cCI6MjA5OTA1ODQ5N30.0_mz2hoeXhklEC2YPQOmckf47a7XDC9NpMs2_-tJJZA";
+/* ══════════════════════════════════════════════════════════════════════ */
 
-let actividades = [], inscripciones = [];
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const $app = document.getElementById("app");
 
-function precioEuros(a){
-  for (const k in a) {
-    const n = k.toLowerCase();
-    if (n.includes("precio") || n.includes("cuota") || n.includes("importe") || n.includes("tarifa")) {
-      const v = Number(a[k]);
-      if (!isNaN(v) && v > 0) return v >= 500 ? v/100 : v;
-    }
-  }
-  return 0;
-}
-const eur = v => v.toFixed(2).replace(".", ",") + " €";
+let actividades = [], inscripciones = [], espera = [], hayEspera = true;
+let tab = "dashboard", busqueda = "", filtroActividad = "todas";
 
-// ---- Sesión ----
-document.getElementById("formLogin").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const err = document.getElementById("l_error");
-  err.style.display = "none";
-  const { error } = await db.auth.signInWithPassword({
-    email: document.getElementById("l_email").value.trim(),
-    password: document.getElementById("l_pass").value
-  });
-  if (error) { err.textContent = "Email o contraseña incorrectos."; err.style.display = "block"; return; }
-  entrar();
-});
+/* ---------- helpers ---------- */
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt = n => Number(n || 0).toLocaleString("es-ES", {style:"currency", currency:"EUR"});
+/* ⚠️ Ajusta estos dos si tus columnas se llaman distinto en Supabase: */
+const precioDe = a => Number(a.precio ?? a.precio_euros ?? a.precio_mes ?? 0);
+const plazasDe = a => Number(a.plazas ?? a.plazas_totales ?? 0);
 
-async function salir(){ await db.auth.signOut(); location.reload(); }
+const PALETA = ["bg-rose-500","bg-indigo-500","bg-amber-500","bg-teal-600","bg-teal-500","bg-purple-500"];
+const colorDe = idx => PALETA[idx % PALETA.length];
+const iconoDe = n => { n=(n||"").toLowerCase();
+  if(n.includes("baile")) return "💃"; if(n.includes("ia")) return "🤖";
+  if(n.includes("arte")||n.includes("dibujo")) return "🎨";
+  if(n.includes("acogida")) return "🏠"; return "⭐"; };
+const actividadDe = id => actividades.find(a => String(a.id) === String(id));
+const inscritosDe = id => inscripciones.filter(i => String(i.actividad_id) === String(id)).length;
+const estadoDe = i => i.estado_pago || "activo";
+const mesActual = new Date().toLocaleDateString("es-ES",{month:"long",year:"numeric"});
+const edad = f => { if(!f) return null; const n=new Date(f),h=new Date();
+  let e=h.getFullYear()-n.getFullYear(); const m=h.getMonth()-n.getMonth();
+  if(m<0||(m===0&&h.getDate()<n.getDate())) e--; return e; };
 
-async function comprobarSesion(){
-  const { data } = await db.auth.getSession();
-  if (data.session) entrar();
-}
-
-async function entrar(){
-  document.getElementById("login").style.display = "none";
-  document.getElementById("panel").style.display = "block";
-  const r1 = await db.from("actividades").select("*").order("id");
-  const r2 = await db.from("inscripciones").select("*").order("id", { ascending:false });
-  actividades = r1.data || [];
-  inscripciones = r2.data || [];
-  pintarDashboard();
-  pintarInscripciones();
-  pintarActividades();
+function notificar(msg){
+  const d = document.createElement("div");
+  d.className = "fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-xl bg-neutral-900 px-5 py-3 text-sm font-medium text-white shadow-lg";
+  d.textContent = msg; document.body.appendChild(d);
+  setTimeout(() => d.remove(), 3500);
 }
 
-// ---- Vistas ----
-function ver(nombre, btn){
-  document.querySelectorAll(".vista").forEach(v => v.classList.remove("activa"));
-  document.getElementById("v-"+nombre).classList.add("activa");
-  document.querySelectorAll("nav button").forEach(b => b.classList.remove("activa"));
-  btn.classList.add("activa");
+/* ---------- datos ---------- */
+async function cargarDatos(){
+  const [a, i] = await Promise.all([
+    sb.from("actividades").select("*").order("id"),
+    sb.from("inscripciones").select("*").order("created_at", {ascending:false})
+  ]);
+  actividades = a.data || []; inscripciones = i.data || [];
+  const e = await sb.from("lista_espera").select("*").order("created_at");
+  if (e.error) { hayEspera = false; espera = []; } else { hayEspera = true; espera = e.data || []; }
 }
 
-function actividadDe(ins){
-  const id = ins.actividad_id ?? ins.actividad ?? null;
-  return actividades.find(a => a.id === id) || null;
+function suscribirRealtime(){
+  sb.channel("admin-live")
+    .on("postgres_changes", {event:"*", schema:"public"}, async () => { await cargarDatos(); renderApp(); })
+    .subscribe();
 }
 
-function pintarDashboard(){
-  const meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
-  const hoy = new Date();
-  document.getElementById("tituloMes").textContent = "Resumen · " + meses[hoy.getMonth()].charAt(0).toUpperCase() + meses[hoy.getMonth()].slice(1) + " " + hoy.getFullYear();
+/* ---------- LOGIN ---------- */
+function renderLogin(msjError){
+  $app.innerHTML = `
+  <div class="flex min-h-screen items-center justify-center bg-neutral-950 px-4">
+    <div class="w-full max-w-sm rounded-2xl bg-white p-8 shadow-xl">
+      <div class="text-center">
+        <span class="text-3xl font-black italic tracking-tight" style="font-family:'Arial Black',Arial,sans-serif">ToBe</span>
+        <div class="text-[9px] font-bold tracking-[0.45em] text-neutral-900">EXPERIENCES</div>
+        <div class="mt-4 inline-flex items-center gap-2 rounded-full bg-neutral-100 px-3 py-1 text-xs font-semibold text-neutral-500">🔒 Panel de administración</div>
+      </div>
+      <input id="email" type="email" placeholder="Email" class="mt-6 w-full rounded-xl border border-neutral-300 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-neutral-800">
+      <input id="pass" type="password" placeholder="Contraseña" class="mt-2 w-full rounded-xl border ${msjError?"border-red-400 bg-red-50":"border-neutral-300"} px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-neutral-800">
+      ${msjError ? `<p class="mt-1 text-xs text-red-600">${esc(msjError)}</p>` : ""}
+      <button id="btnLogin" class="mt-3 w-full rounded-xl bg-neutral-900 py-3 font-bold text-white hover:bg-neutral-700">Entrar</button>
+    </div>
+  </div>`;
+  const entrar = async () => {
+    const {error} = await sb.auth.signInWithPassword({
+      email: document.getElementById("email").value.trim(),
+      password: document.getElementById("pass").value
+    });
+    if (error) return renderLogin("Email o contraseña incorrectos");
+    await cargarDatos(); renderApp(); suscribirRealtime();
+  };
+  document.getElementById("btnLogin").onclick = entrar;
+  document.getElementById("pass").onkeydown = e => e.key === "Enter" && entrar();
+}
 
-  let ingresos = 0;
-  inscripciones.forEach(i => { const a = actividadDe(i); if (a) ingresos += precioEuros(a); });
-  const totalPlazas = actividades.reduce((s,a) => s + (a.plazas_totales ?? 0), 0);
+/* ---------- COMPONENTES ---------- */
+function badgePago(estado){
+  const map = {
+    activo:   ["bg-green-100 text-green-700","✔ Al corriente"],
+    impagado: ["bg-red-100 text-red-700","✖ Impagado"],
+    pendiente:["bg-amber-100 text-amber-700","⏳ Pago pendiente"]
+  };
+  const [cls, txt] = map[estado] || map.activo;
+  return `<span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${cls}">${txt}</span>`;
+}
+function kpi(emoji, label, valor, sub, color){
+  return `<div class="rounded-2xl border border-neutral-200 bg-white p-4">
+    <div class="inline-flex h-9 w-9 items-center justify-center rounded-lg ${color} text-white">${emoji}</div>
+    <div class="mt-2 text-2xl font-extrabold text-neutral-900">${valor}</div>
+    <div class="text-xs font-medium text-neutral-500">${label}</div>
+    ${sub ? `<div class="mt-0.5 text-xs text-neutral-400">${sub}</div>` : ""}
+  </div>`;
+}
 
-  document.getElementById("tarjetas").innerHTML = `
-    <div class="cardk"><div class="icono">💶</div><div class="valor">${eur(ingresos)}</div>
-      <div class="titulo">Ingresos recurrentes / mes</div><div class="sub">Según inscripciones registradas</div></div>
-    <div class="cardk"><div class="icono">🧒</div><div class="valor">${inscripciones.length}</div>
-      <div class="titulo">Niños/as inscritos</div><div class="sub">de ${totalPlazas} plazas totales</div></div>`;
+/* ---------- VISTAS ---------- */
+function vistaDashboard(){
+  const mrr = inscripciones.filter(i => estadoDe(i) === "activo")
+    .reduce((s,i) => s + precioDe(actividadDe(i.actividad_id) || {}), 0);
+  const totalPlazas = actividades.reduce((s,a) => s + plazasDe(a), 0);
+  const impagados = inscripciones.filter(i => estadoDe(i) === "impagado").length;
+  const enEspera = espera.filter(e => e.estado === "esperando").length;
 
-  document.getElementById("ocupacion").innerHTML = actividades.map(a => {
-    const ocupadas = a.plazas_ocupadas ?? inscripciones.filter(i => actividadDe(i) === a).length;
-    const tot = a.plazas_totales ?? 0;
-    const pct = tot ? Math.min(100, ocupadas/tot*100) : 0;
-    return `<div class="fila-act">
-      <span class="nombre">${a.nombre}</span>
-      <span class="ocup">${ocupadas}/${tot}</span>
-      <span class="precio">${eur(precioEuros(a))}<small style="font-weight:400;color:#888">/mes</small></span>
-      <div class="barra"><div style="width:${pct}%"></div></div>
+  const barras = actividades.map((a, idx) => {
+    const oc = inscritosDe(a.id), tot = plazasDe(a);
+    const pct = tot ? Math.round(oc/tot*100) : 0;
+    return `<div class="flex items-center gap-4 rounded-xl border border-neutral-200 bg-white p-4">
+      <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${colorDe(idx)} text-white text-lg">${iconoDe(a.nombre)}</div>
+      <div class="min-w-0 flex-1">
+        <div class="flex items-baseline justify-between">
+          <span class="truncate font-semibold text-neutral-800">${esc(a.nombre)}</span>
+          <span class="ml-2 shrink-0 text-sm text-neutral-500">${oc}/${tot}</span>
+        </div>
+        <div class="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-neutral-100">
+          <div class="h-full rounded-full ${pct>=100?"bg-red-500":pct>=70?"bg-orange-400":"bg-green-500"}" style="width:${Math.min(pct,100)}%"></div>
+        </div>
+      </div>
+      <div class="shrink-0 text-right text-sm font-bold text-neutral-700">${fmt(precioDe(a))}<span class="text-xs font-normal text-neutral-400">/mes</span></div>
     </div>`;
   }).join("");
+
+  return `<h1 class="mb-4 text-xl font-extrabold text-neutral-900">Resumen · ${mesActual}</h1>
+    <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      ${kpi("💶","Ingresos recurrentes / mes",fmt(mrr),"Inscripciones al corriente","bg-green-600")}
+      ${kpi("🧒","Niños/as inscritos",inscripciones.length,`de ${totalPlazas} plazas totales`,"bg-indigo-600")}
+      ${kpi("📋","En lista de espera",enEspera,hayEspera?"":"Tabla no creada aún","bg-amber-500")}
+      ${kpi("⚠️","Recibos impagados",impagados,impagados>0?"Requiere atención":"Todo al día",impagados>0?"bg-red-500":"bg-neutral-400")}
+    </div>
+    <h2 class="mb-3 mt-8 text-sm font-bold uppercase tracking-wide text-neutral-400">Ocupación por actividad</h2>
+    <div class="space-y-3">${barras || '<p class="text-sm text-neutral-400">No hay actividades.</p>'}</div>`;
 }
 
-function pintarInscripciones(){
-  document.getElementById("numIns").textContent = inscripciones.length;
-  if (!inscripciones.length) { document.getElementById("tablaIns").innerHTML = '<div class="vacio">Aún no hay inscripciones.</div>'; return; }
-  const filas = inscripciones.map(i => {
-    const a = actividadDe(i);
-    const fecha = i.created_at ? new Date(i.created_at).toLocaleDateString("es-ES") : "";
-    return `<tr>
-      <td><strong>${i.nombre_nino ?? ""}</strong><br><small style="color:#888">${i.fecha_nacimiento ?? ""}</small></td>
-      <td>${a ? a.nombre : "—"}</td>
-      <td>${i.nombre_tutor ?? ""}</td>
-      <td>${i.email ?? ""}<br>${i.telefono ?? ""}</td>
-      <td>${i.uso_imagenes ? "✅" : "❌"}</td>
-      <td>${i.observaciones ?? ""}</td>
-      <td>${fecha}</td>
-    </tr>`;
-  }).join("");
-  document.getElementById("tablaIns").innerHTML = `<table>
-    <tr><th>Niño/a</th><th>Actividad</th><th>Tutor/a</th><th>Contacto</th><th>Imágenes</th><th>Observaciones</th><th>Fecha</th></tr>${filas}</table>`;
+function tarjetaInscripcion(i){
+  const a = actividadDe(i.actividad_id) || {nombre:"—"};
+  const ed = edad(i.fecha_nacimiento);
+  const fecha = i.created_at ? new Date(i.created_at).toLocaleDateString("es-ES") : "";
+  const est = estadoDe(i);
+  return `<div class="rounded-xl border border-neutral-200 bg-white p-4">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div class="min-w-0">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="font-bold text-neutral-900">${esc(i.nombre_nino)}</span>
+          ${ed !== null ? `<span class="text-xs text-neutral-400">(${ed} años)</span>` : ""}
+          ${i.uso_imagenes
+            ? '<span class="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700">📷 Imágenes ✓</span>'
+            : '<span class="inline-flex items-center gap-1 rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-neutral-500">📷 Sin autorización</span>'}
+          ${badgePago(est)}
+        </div>
+        <div class="mt-1 text-sm text-neutral-500">${esc(a.nombre)} · Alta: ${fecha}</div>
+        <div class="mt-0.5 text-sm text-neutral-500">👤 ${esc(i.nombre_tutor)} · <a class="underline" href="mailto:${esc(i.email)}">${esc(i.email)}</a> · ${esc(i.telefono)}</div>
+        ${i.observaciones ? `<div class="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700">⚠️ ${esc(i.observaciones)}</div>` : ""}
+      </div>
+      <div class="flex shrink-0 flex-col items-end gap-1.5">
+        <button onclick="darDeBaja('${i.id}','${esc(i.nombre_nino)}')" class="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50">🗑 Dar de baja</button>
+        ${est === "activo"
+          ? `<button onclick="marcarPago('${i.id}','impagado')" class="rounded-lg border border-neutral-300 px-3 py-1.5 text-xs font-semibold text-neutral-600 hover:bg-neutral-50">Marcar impagado</button>`
+          : `<button onclick="marcarPago('${i.id}','activo')" class="rounded-lg border border-green-300 px-3 py-1.5 text-xs font-semibold text-green-700 hover:bg-green-50">Marcar al corriente</button>`}
+      </div>
+    </div>
+  </div>`;
 }
 
-function pintarActividades(){
-  const filas = actividades.map(a => {
-    const ocupadas = a.plazas_ocupadas ?? 0, tot = a.plazas_totales ?? 0;
-    return `<tr><td><strong>${a.nombre}</strong></td><td>${a.dia ?? "L–V"}</td>
-      <td>${ocupadas}/${tot}</td><td>${eur(precioEuros(a))}/mes</td></tr>`;
-  }).join("");
-  document.getElementById("tablaAct").innerHTML = `<table>
-    <tr><th>Actividad</th><th>Día</th><th>Plazas</th><th>Precio</th></tr>${filas}</table>`;
+function inscripcionesFiltradas(){
+  return inscripciones.filter(i => {
+    const okB = ((i.nombre_nino||"")+(i.nombre_tutor||"")+(i.email||"")).toLowerCase().includes(busqueda.toLowerCase());
+    const okA = filtroActividad === "todas" || String(i.actividad_id) === String(filtroActividad);
+    return okB && okA;
+  });
 }
 
-comprobarSesion();
+function vistaInscripciones(){
+  const lista = inscripcionesFiltradas();
+  return `<h1 class="mb-4 text-xl font-extrabold text-neutral-900">Inscripciones (${lista.length})</h1>
+    <div class="mb-4 flex flex-col gap-2 sm:flex-row">
+      <input id="inpBusca" value="${esc(busqueda)}" placeholder="Buscar por niño/a, tutor o email…"
+        class="flex-1 rounded-xl border border-neutral-300 bg-white px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-neutral-800">
+      <select id="selFiltro" class="rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm outline-none">
+        <option value="todas">Todas las actividades</option>
+        ${actividades.map(a => `<option value="${a.id}" ${String(filtroActividad)===String(a.id)?"selected":""}>${esc(a.nombre)}</option>`).join("")}
+      </select>
+    </div>
+    <div id="listaIns" class="space-y-3">
+      ${lista.map(tarjetaInscripcion).join("") || '<div class="rounded-xl border border-dashed border-neutral-300 p-8 text-center text-sm text-neutral-400">No hay inscripciones que coincidan.</div>'}
+    </div>`;
+}
+
+function vistaActividades(){
+  return `<h1 class="mb-4 text-xl font-extrabold text-neutral-900">Gestión de actividades</h1>
+    <div class="space-y-3">
+    ${actividades.map((a, idx) => `
+      <div class="flex flex-wrap items-center gap-4 rounded-xl border border-neutral-200 bg-white p-4">
+        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${colorDe(idx)} text-white text-lg">${iconoDe(a.nombre)}</div>
+        <div class="min-w-0 flex-1">
+          <div class="font-bold text-neutral-900">${esc(a.nombre)}</div>
+          <div class="text-sm text-neutral-500">${fmt(precioDe(a))}/mes</div>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-sm text-neutral-500">${inscritosDe(a.id)} inscritos</span>
+          <div class="flex items-center gap-1 rounded-lg border border-neutral-200 p-1">
+            <button onclick="cambiarPlazas('${a.id}',-1)" class="rounded px-2 py-1 hover:bg-neutral-100" title="Reducir plazas">−</button>
+            <span class="w-14 text-center text-sm font-bold text-neutral-800">${plazasDe(a)} pl.</span>
+            <button onclick="cambiarPlazas('${a.id}',1)" class="rounded px-2 py-1 hover:bg-neutral-100" title="Ampliar plazas">+</button>
+          </div>
+        </div>
+      </div>`).join("")}
+    </div>
+    <p class="mt-4 text-xs text-neutral-400">💡 No puedes reducir las plazas por debajo del número de inscritos actuales.</p>`;
+}
+
+function vistaEspera(){
+  if (!hayEspera) return `<h1 class="mb-4 text-xl font-extrabold text-neutral-900">Lista de espera</h1>
+    <div class="rounded-xl border border-dashed border-neutral-300 p-8 text-center text-sm text-neutral-400">La tabla <code>lista_espera</code> no existe aún en Supabase. Ejecuta el SQL de configuración.</div>`;
+  const esperando = espera.filter(e => e.estado === "esperando");
+  return `<h1 class="mb-4 text-xl font-extrabold text-neutral-900">Lista de espera</h1>
+    ${espera.length === 0 ? '<div class="rounded-xl border border-dashed border-neutral-300 p-8 text-center text-sm text-neutral-400">No hay nadie en lista de espera. 🎉</div>' : `
+    <div class="space-y-3">
+    ${espera.map((e, idx) => {
+      const a = actividadDe(e.actividad_id) || {nombre:"—"};
+      const fecha = e.created_at ? new Date(e.created_at).toLocaleDateString("es-ES") : "";
+      return `<div class="flex flex-wrap items-center gap-4 rounded-xl border border-neutral-200 bg-white p-4">
+        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 font-extrabold text-amber-700">#${idx+1}</div>
+        <div class="min-w-0 flex-1">
+          <div class="font-bold text-neutral-900">${esc(e.nombre_nino)}</div>
+          <div class="text-sm text-neutral-500">${esc(a.nombre)} · Solicitud: ${fecha}</div>
+          <div class="text-sm text-neutral-500">👤 ${esc(e.nombre_tutor)} · ${esc(e.email)}</div>
+        </div>
+        ${e.estado === "esperando"
+          ? `<button onclick="ofrecerPlaza('${e.id}')" class="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-bold text-white hover:bg-neutral-700">📧 Ofrecer plaza</button>`
+          : '<span class="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">✉️ Oferta enviada</span>'}
+        <button onclick="quitarDeEspera('${e.id}','${esc(e.nombre_nino)}')" class="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50">🗑</button>
+      </div>`;
+    }).join("")}
+    </div>`}
+    <p class="mt-4 text-xs text-neutral-400">Al pulsar "Ofrecer plaza" se abre un email preparado para la familia y se marca como oferta enviada.</p>`;
+}
+
+function vistaPagos(){
+  const activos = inscripciones.filter(i => estadoDe(i) === "activo");
+  const cobrado = activos.reduce((s,i) => s + precioDe(actividadDe(i.actividad_id) || {}), 0);
+  return `<h1 class="mb-1 text-xl font-extrabold text-neutral-900">Pagos · ${mesActual}</h1>
+    <p class="mb-4 text-sm text-neutral-500">Al corriente este mes: <strong class="text-green-700">${fmt(cobrado)}</strong></p>
+    <div class="overflow-hidden rounded-xl border border-neutral-200 bg-white">
+    ${inscripciones.map((i, idx) => {
+      const a = actividadDe(i.actividad_id) || {nombre:"—"};
+      const ok = estadoDe(i) === "activo";
+      return `<div class="flex flex-wrap items-center gap-3 p-4 ${idx>0?"border-t border-neutral-100":""}">
+        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${ok?"bg-green-100":"bg-red-100"}">${ok?"✔":"✖"}</div>
+        <div class="min-w-0 flex-1">
+          <div class="text-sm font-semibold text-neutral-800">${esc(i.nombre_nino)}</div>
+          <div class="text-xs text-neutral-500">${esc(a.nombre)} · ${mesActual}</div>
+        </div>
+        <div class="text-sm font-bold text-neutral-800">${fmt(precioDe(a))}</div>
+        ${!ok ? `<button onclick="marcarPago('${i.id}','activo')" class="rounded-lg border border-neutral-300 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:bg-neutral-50">Marcar cobrado</button>` : ""}
+      </div>`;
+    }).join("") || '<div class="p-8 text-center text-sm text-neutral-400">Aún no hay inscripciones.</div>'}
+    </div>
+    <p class="mt-4 text-xs text-neutral-400">💡 De momento el estado de pago se gestiona a mano. Cuando conectemos Stripe, los cobros y sus reintentos aparecerán aquí automáticamente.</p>`;
+}
+
+/* ---------- APP ---------- */
+function renderApp(){
+  const impagados = inscripciones.filter(i => estadoDe(i) === "impagado").length;
+  const enEspera = espera.filter(e => e.estado === "esperando").length;
+  const TABS = [
+    {id:"dashboard", label:"Dashboard"},
+    {id:"inscripciones", label:"Inscripciones", badge: inscripciones.length},
+    {id:"actividades", label:"Actividades"},
+    {id:"espera", label:"Lista de espera", badge: enEspera},
+    {id:"pagos", label:"Pagos", badge: impagados}
+  ];
+  const vistas = {dashboard:vistaDashboard, inscripciones:vistaInscripciones, actividades:vistaActividades, espera:vistaEspera, pagos:vistaPagos};
+
+  $app.innerHTML = `
+  <header class="border-b border-neutral-200 bg-white">
+    <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+      <div class="flex items-center gap-3">
+        <span class="text-xl font-black italic tracking-tight" style="font-family:'Arial Black',Arial,sans-serif">ToBe</span>
+        <span class="rounded-full bg-neutral-900 px-2.5 py-0.5 text-xs font-bold text-white">ADMIN</span>
+      </div>
+      <button id="btnSalir" class="text-sm text-neutral-500 hover:text-neutral-900">↩ Salir</button>
+    </div>
+    <div class="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-4">
+      ${TABS.map(t => `<button data-tab="${t.id}" class="relative flex shrink-0 items-center gap-1.5 border-b-2 px-3 py-2.5 text-sm font-semibold transition ${tab===t.id?"border-neutral-900 text-neutral-900":"border-transparent text-neutral-400 hover:text-neutral-600"}">
+        ${t.label}${t.badge > 0 ? `<span class="ml-0.5 rounded-full bg-red-500 px-1.5 text-xs font-bold text-white">${t.badge}</span>` : ""}
+      </button>`).join("")}
+    </div>
+  </header>
+  <main class="mx-auto max-w-6xl px-4 py-6">${vistas[tab]()}</main>`;
+
+  document.querySelectorAll("[data-tab]").forEach(b => b.onclick = () => { tab = b.dataset.tab; renderApp(); });
+  document.getElementById("btnSalir").onclick = async () => { await sb.auth.signOut(); renderLogin(); };
+
+  const inp = document.getElementById("inpBusca");
+  if (inp) inp.oninput = e => { busqueda = e.target.value;
+    document.getElementById("listaIns").innerHTML =
+      inscripcionesFiltradas().map(tarjetaInscripcion).join("") ||
+      '<div class="rounded-xl border border-dashed border-neutral-300 p-8 text-center text-sm text-neutral-400">No hay inscripciones que coincidan.</div>'; };
+  const sel = document.getElementById("selFiltro");
+  if (sel) sel.onchange = e => { filtroActividad = e.target.value; renderApp(); };
+}
+
+/* ---------- ACCIONES ---------- */
+window.darDeBaja = async (id, nombre) => {
+  if (!confirm(`¿Dar de baja a ${nombre}? Se eliminará su inscripción.`)) return;
+  const {error} = await sb.from("inscripciones").delete().eq("id", id);
+  if (error) return notificar("❌ " + error.message);
+  await cargarDatos(); renderApp(); notificar(`✅ ${nombre} dado/a de baja.`);
+};
+window.marcarPago = async (id, estado) => {
+  const {error} = await sb.from("inscripciones").update({estado_pago: estado}).eq("id", id);
+  if (error) return notificar("❌ " + error.message);
+  await cargarDatos(); renderApp(); notificar("✅ Estado de pago actualizado.");
+};
+window.cambiarPlazas = async (id, delta) => {
+  const a = actividadDe(id); if (!a) return;
+  const nuevas = plazasDe(a) + delta;
+  if (nuevas < inscritosDe(id)) return notificar("⚠️ No puedes bajar de los inscritos actuales.");
+  const campo = a.plazas !== undefined ? "plazas" : "plazas_totales";
+  const {error} = await sb.from("actividades").update({[campo]: nuevas}).eq("id", id);
+  if (error) return notificar("❌ " + error.message);
+  await cargarDatos(); renderApp();
+};
+window.ofrecerPlaza = async (id) => {
+  const e = espera.find(x => String(x.id) === String(id)); if (!e) return;
+  const a = actividadDe(e.actividad_id) || {nombre:""};
+  const {error} = await sb.from("lista_espera").update({estado:"ofrecida"}).eq("id", id);
+  if (error) return notificar("❌ " + error.message);
+  window.open(`mailto:${e.email}?subject=${encodeURIComponent("¡Plaza disponible en "+a.nombre+"! · ToBe Experiences")}&body=${encodeURIComponent("Hola "+(e.nombre_tutor||"")+",\n\n¡Buenas noticias! Se ha liberado una plaza en "+a.nombre+" para "+(e.nombre_nino||"")+".\n\nPara confirmarla, responde a este email en las próximas 24 horas.\n\nUn saludo,\nToBe Experiences")}`);
+  await cargarDatos(); renderApp(); notificar(`📧 Email preparado para ${e.email}.`);
+};
+window.quitarDeEspera = async (id, nombre) => {
+  if (!confirm(`¿Quitar a ${nombre} de la lista de espera?`)) return;
+  const {error} = await sb.from("lista_espera").delete().eq("id", id);
+  if (error) return notificar("❌ " + error.message);
+  await cargarDatos(); renderApp();
+};
+
+/* ---------- INICIO ---------- */
+(async () => {
+  const {data:{session}} = await sb.auth.getSession();
+  if (session) { await cargarDatos(); renderApp(); suscribirRealtime(); }
+  else renderLogin();
+})();
 </script>
 </body>
 </html>
+ 
