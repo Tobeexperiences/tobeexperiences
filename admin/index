@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ToBe · Administración</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  body { background:#f6f6f7; color:#111; }
+  /* Login */
+  .login-wrap { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; background:#0a0a0a; }
+  .login-box { background:#fff; border-radius:16px; padding:36px; max-width:380px; width:100%; }
+  .login-box .logo { font-size:34px; font-weight:900; font-style:italic; }
+  .login-box .logo small { font-style:normal; font-weight:600; letter-spacing:6px; font-size:11px; display:block; }
+  .login-box label { display:block; font-size:13px; font-weight:600; margin:16px 0 5px; }
+  .login-box input { width:100%; padding:11px; border:1px solid #ccc; border-radius:8px; font-size:15px; }
+  .login-box button { width:100%; margin-top:20px; background:#111; color:#fff; border:none; border-radius:9px; padding:13px; font-size:15px; font-weight:600; cursor:pointer; }
+  .login-box .error { color:#c00; font-size:13.5px; margin-top:12px; display:none; }
+  /* Panel */
+  #panel { display:none; }
+  header { background:#fff; border-bottom:1px solid #e5e5e5; padding:14px 24px; display:flex; align-items:center; gap:12px; }
+  header .logo { font-size:22px; font-weight:900; font-style:italic; }
+  header .badge { background:#111; color:#fff; font-size:11px; font-weight:700; padding:3px 9px; border-radius:6px; letter-spacing:1px; }
+  header .salir { margin-left:auto; background:none; border:none; color:#555; font-size:14px; cursor:pointer; }
+  nav { background:#fff; border-bottom:1px solid #e5e5e5; padding:0 24px; display:flex; gap:4px; overflow-x:auto; }
+  nav button { background:none; border:none; padding:13px 16px; font-size:14.5px; font-weight:600; color:#666; cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; }
+  nav button.activa { color:#111; border-bottom-color:#111; }
+  nav button .num { background:#111; color:#fff; border-radius:10px; font-size:11px; padding:1px 7px; margin-left:5px; }
+  main { max-width:1100px; margin:0 auto; padding:28px 20px 60px; }
+  h2 { font-size:21px; margin-bottom:18px; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:16px; margin-bottom:30px; }
+  .cardk { background:#fff; border:1px solid #e8e8e8; border-radius:14px; padding:20px; }
+  .cardk .icono { font-size:22px; }
+  .cardk .valor { font-size:30px; font-weight:800; margin-top:8px; }
+  .cardk .titulo { font-size:14px; font-weight:600; margin-top:2px; }
+  .cardk .sub { font-size:12.5px; color:#888; margin-top:2px; }
+  .seccion-t { font-size:12.5px; font-weight:700; letter-spacing:1px; color:#888; margin:26px 0 12px; }
+  .fila-act { background:#fff; border:1px solid #e8e8e8; border-radius:12px; padding:16px 18px; margin-bottom:10px;
+              display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  .fila-act .nombre { font-weight:700; flex:1; min-width:150px; }
+  .fila-act .ocup { font-size:13.5px; color:#555; }
+  .fila-act .precio { font-weight:700; }
+  .barra { width:100%; height:7px; background:#eee; border-radius:4px; overflow:hidden; margin-top:8px; }
+  .barra div { height:100%; background:#0a7d3b; border-radius:4px; }
+  table { width:100%; background:#fff; border:1px solid #e8e8e8; border-radius:12px; border-collapse:separate; border-spacing:0; overflow:hidden; font-size:14px; }
+  th { text-align:left; padding:12px 14px; background:#fafafa; font-size:12.5px; color:#777; border-bottom:1px solid #eee; }
+  td { padding:12px 14px; border-bottom:1px solid #f2f2f2; vertical-align:top; }
+  tr:last-child td { border-bottom:none; }
+  .vista { display:none; }
+  .vista.activa { display:block; }
+  .vacio { color:#888; padding:30px 0; text-align:center; }
+  .tabla-scroll { overflow-x:auto; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-wrap" id="login">
+  <div class="login-box">
+    <div class="logo">ToBe <small>EXPERIENCES · ADMIN</small></div>
+    <form id="formLogin">
+      <label>Email</label>
+      <input type="email" id="l_email" required>
+      <label>Contraseña</label>
+      <input type="password" id="l_pass" required>
+      <div class="error" id="l_error"></div>
+      <button type="submit">Entrar</button>
+    </form>
+  </div>
+</div>
+
+<!-- PANEL -->
+<div id="panel">
+  <header>
+    <span class="logo">ToBe</span><span class="badge">ADMIN</span>
+    <button class="salir" onclick="salir()">↪ Salir</button>
+  </header>
+  <nav>
+    <button class="activa" onclick="ver('dashboard', this)">Dashboard</button>
+    <button onclick="ver('inscripciones', this)">Inscripciones <span class="num" id="numIns">0</span></button>
+    <button onclick="ver('actividades', this)">Actividades</button>
+  </nav>
+  <main>
+    <div class="vista activa" id="v-dashboard">
+      <h2 id="tituloMes">Resumen</h2>
+      <div class="cards" id="tarjetas"></div>
+      <div class="seccion-t">OCUPACIÓN POR ACTIVIDAD</div>
+      <div id="ocupacion"></div>
+    </div>
+    <div class="vista" id="v-inscripciones">
+      <h2>Inscripciones</h2>
+      <div class="tabla-scroll"><div id="tablaIns"></div></div>
+    </div>
+    <div class="vista" id="v-actividades">
+      <h2>Actividades</h2>
+      <div class="tabla-scroll"><div id="tablaAct"></div></div>
+    </div>
+  </main>
+</div>
+
+<script>
+const SUPABASE_URL = "https://fqjiqrcwvjejmurushsf.supabase.co";
+const SUPABASE_KEY = "sb_publishable_lAtrJRKGC4ysFiLu2bWCjQ_6A-X4FDN";
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let actividades = [], inscripciones = [];
+
+function precioEuros(a){
+  for (const k in a) {
+    const n = k.toLowerCase();
+    if (n.includes("precio") || n.includes("cuota") || n.includes("importe") || n.includes("tarifa")) {
+      const v = Number(a[k]);
+      if (!isNaN(v) && v > 0) return v >= 500 ? v/100 : v;
+    }
+  }
+  return 0;
+}
+const eur = v => v.toFixed(2).replace(".", ",") + " €";
+
+// ---- Sesión ----
+document.getElementById("formLogin").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const err = document.getElementById("l_error");
+  err.style.display = "none";
+  const { error } = await db.auth.signInWithPassword({
+    email: document.getElementById("l_email").value.trim(),
+    password: document.getElementById("l_pass").value
+  });
+  if (error) { err.textContent = "Email o contraseña incorrectos."; err.style.display = "block"; return; }
+  entrar();
+});
+
+async function salir(){ await db.auth.signOut(); location.reload(); }
+
+async function comprobarSesion(){
+  const { data } = await db.auth.getSession();
+  if (data.session) entrar();
+}
+
+async function entrar(){
+  document.getElementById("login").style.display = "none";
+  document.getElementById("panel").style.display = "block";
+  const r1 = await db.from("actividades").select("*").order("id");
+  const r2 = await db.from("inscripciones").select("*").order("id", { ascending:false });
+  actividades = r1.data || [];
+  inscripciones = r2.data || [];
+  pintarDashboard();
+  pintarInscripciones();
+  pintarActividades();
+}
+
+// ---- Vistas ----
+function ver(nombre, btn){
+  document.querySelectorAll(".vista").forEach(v => v.classList.remove("activa"));
+  document.getElementById("v-"+nombre).classList.add("activa");
+  document.querySelectorAll("nav button").forEach(b => b.classList.remove("activa"));
+  btn.classList.add("activa");
+}
+
+function actividadDe(ins){
+  const id = ins.actividad_id ?? ins.actividad ?? null;
+  return actividades.find(a => a.id === id) || null;
+}
+
+function pintarDashboard(){
+  const meses = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+  const hoy = new Date();
+  document.getElementById("tituloMes").textContent = "Resumen · " + meses[hoy.getMonth()].charAt(0).toUpperCase() + meses[hoy.getMonth()].slice(1) + " " + hoy.getFullYear();
+
+  let ingresos = 0;
+  inscripciones.forEach(i => { const a = actividadDe(i); if (a) ingresos += precioEuros(a); });
+  const totalPlazas = actividades.reduce((s,a) => s + (a.plazas_totales ?? 0), 0);
+
+  document.getElementById("tarjetas").innerHTML = `
+    <div class="cardk"><div class="icono">💶</div><div class="valor">${eur(ingresos)}</div>
+      <div class="titulo">Ingresos recurrentes / mes</div><div class="sub">Según inscripciones registradas</div></div>
+    <div class="cardk"><div class="icono">🧒</div><div class="valor">${inscripciones.length}</div>
+      <div class="titulo">Niños/as inscritos</div><div class="sub">de ${totalPlazas} plazas totales</div></div>`;
+
+  document.getElementById("ocupacion").innerHTML = actividades.map(a => {
+    const ocupadas = a.plazas_ocupadas ?? inscripciones.filter(i => actividadDe(i) === a).length;
+    const tot = a.plazas_totales ?? 0;
+    const pct = tot ? Math.min(100, ocupadas/tot*100) : 0;
+    return `<div class="fila-act">
+      <span class="nombre">${a.nombre}</span>
+      <span class="ocup">${ocupadas}/${tot}</span>
+      <span class="precio">${eur(precioEuros(a))}<small style="font-weight:400;color:#888">/mes</small></span>
+      <div class="barra"><div style="width:${pct}%"></div></div>
+    </div>`;
+  }).join("");
+}
+
+function pintarInscripciones(){
+  document.getElementById("numIns").textContent = inscripciones.length;
+  if (!inscripciones.length) { document.getElementById("tablaIns").innerHTML = '<div class="vacio">Aún no hay inscripciones.</div>'; return; }
+  const filas = inscripciones.map(i => {
+    const a = actividadDe(i);
+    const fecha = i.created_at ? new Date(i.created_at).toLocaleDateString("es-ES") : "";
+    return `<tr>
+      <td><strong>${i.nombre_nino ?? ""}</strong><br><small style="color:#888">${i.fecha_nacimiento ?? ""}</small></td>
+      <td>${a ? a.nombre : "—"}</td>
+      <td>${i.nombre_tutor ?? ""}</td>
+      <td>${i.email ?? ""}<br>${i.telefono ?? ""}</td>
+      <td>${i.uso_imagenes ? "✅" : "❌"}</td>
+      <td>${i.observaciones ?? ""}</td>
+      <td>${fecha}</td>
+    </tr>`;
+  }).join("");
+  document.getElementById("tablaIns").innerHTML = `<table>
+    <tr><th>Niño/a</th><th>Actividad</th><th>Tutor/a</th><th>Contacto</th><th>Imágenes</th><th>Observaciones</th><th>Fecha</th></tr>${filas}</table>`;
+}
+
+function pintarActividades(){
+  const filas = actividades.map(a => {
+    const ocupadas = a.plazas_ocupadas ?? 0, tot = a.plazas_totales ?? 0;
+    return `<tr><td><strong>${a.nombre}</strong></td><td>${a.dia ?? "L–V"}</td>
+      <td>${ocupadas}/${tot}</td><td>${eur(precioEuros(a))}/mes</td></tr>`;
+  }).join("");
+  document.getElementById("tablaAct").innerHTML = `<table>
+    <tr><th>Actividad</th><th>Día</th><th>Plazas</th><th>Precio</th></tr>${filas}</table>`;
+}
+
+comprobarSesion();
+</script>
+</body>
+</html>
