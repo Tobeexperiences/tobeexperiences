@@ -91,7 +91,7 @@ function renderLogin(msjError){
     await cargarDatos(); renderApp(); suscribirRealtime();
   };
   document.getElementById("btnLogin").onclick = entrar;
-  document.getElementById("pass").onkeydown = e => e.key === "Enter" && entrar();
+  document.getElementById("pass").onkeydown = e => { if (e.key === "Enter") entrar(); };
 }
 
 /* ---------- COMPONENTES ---------- */
