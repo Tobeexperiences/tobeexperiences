@@ -53,6 +53,7 @@
       font-weight:600; cursor:pointer; text-align:center; text-decoration:none; display:block; }
   .btn-cancel { background:#eee; border:none; color:#111; }
   .btn-send { background:#111; color:#fff; border:none; }
+  .btn-send:disabled { background:#bbb; cursor:not-allowed; }
   .btn-pago { background:#0a7d3b; color:#fff; border:none; }
   .exito { text-align:center; padding:20px 0; }
   .exito .icono { font-size:52px; }
@@ -112,7 +113,7 @@
         </div>
         <div class="error" id="f_error"></div>
         <div class="acciones">
-          <button type="button" class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
+          <button type="button" class="btn-cancel" id="btnCancelar" onclick="cerrarModal()">Cancelar</button>
           <button type="submit" class="btn-send" id="btnEnviar">Enviar inscripción</button>
         </div>
       </form>
@@ -120,7 +121,7 @@
     <div id="exito" class="exito" style="display:none">
       <div class="icono">✅</div>
       <h3>¡Inscripción recibida!</h3>
-      <p>Para reservar la plaza, completa ahora el pago de la primera cuota.<br>
+      <p id="exitoTexto">Para reservar la plaza, completa ahora el pago de la primera cuota.<br>
       La plaza no queda confirmada hasta realizar el pago.</p>
       <div class="acciones">
         <a class="btn-pago" id="btnPago" href="#" target="_blank">Realizar el pago 💳</a>
@@ -164,9 +165,13 @@ const SUPABASE_KEY = "sb_publishable_lAtrJRKGC4ysFiLu2bWCjQ_6A-X4FDN";
 // Si cada actividad tiene su propio enlace, lee las instrucciones bajo el código.
 const PAGO_URL_GENERAL = "";
 
+const EXITO_TEXTO_PAGO = "Para reservar la plaza, completa ahora el pago de la primera cuota.<br>La plaza no queda confirmada hasta realizar el pago.";
+const EXITO_TEXTO_SIN_PAGO = "Nos pondremos en contacto contigo para confirmar la plaza e indicarte cómo realizar el pago.";
+
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let actividades = [];
 let actividadActual = null;
+let enviando = false;
 
 const DIAS_COLOR = { "Lunes":"#0a7d3b","Martes":"#e11d48","Miércoles":"#4f46e5","Jueves":"#f59e0b","Viernes":"#0891b2" };
 
@@ -236,17 +241,33 @@ function abrirModal(id){
   document.getElementById("f_error").style.display = "none";
   document.getElementById("formulario").style.display = "block";
   document.getElementById("exito").style.display = "none";
+  const btn = document.getElementById("btnEnviar");
+  btn.disabled = false; btn.textContent = "Enviar inscripción";
   document.getElementById("overlay").classList.add("open");
 }
 function cerrarModal(recargar){
+  if (enviando) return; // no cerrar mientras se está enviando
   document.getElementById("overlay").classList.remove("open");
   if (recargar) cargar();
 }
 function abrirPolitica(){ document.getElementById("overlayPolitica").classList.add("open"); }
 function cerrarPolitica(){ document.getElementById("overlayPolitica").classList.remove("open"); }
 
+function esErrorDuplicado(error, data){
+  const texto = [
+    error && error.code,
+    error && error.message,
+    error && error.details,
+    error && error.hint,
+    data && data.error,
+    data && data.mensaje
+  ].filter(Boolean).join(" ").toLowerCase();
+  return texto.includes("23505") || texto.includes("inscripcion_unica") || texto.includes("duplicate key");
+}
+
 document.getElementById("form").addEventListener("submit", async (e) => {
   e.preventDefault();
+  if (enviando) return; // evita doble envío
   const err = document.getElementById("f_error");
   err.style.display = "none";
 
@@ -267,34 +288,52 @@ document.getElementById("form").addEventListener("submit", async (e) => {
   }
 
   const btn = document.getElementById("btnEnviar");
+  enviando = true;
   btn.disabled = true; btn.textContent = "Enviando…";
-  const { data, error } = await db.rpc("inscribir", {
-    p_actividad_id: actividadActual.id,
-    p_nombre_nino: document.getElementById("f_nino").value.trim(),
-    p_fecha_nacimiento: document.getElementById("f_nacimiento").value,
-    p_observaciones: document.getElementById("f_obs").value.trim(),
-    p_nombre_tutor: document.getElementById("f_tutor").value.trim(),
-    p_email: document.getElementById("f_email").value.trim(),
-    p_telefono: document.getElementById("f_telefono").value.trim(),
-    p_uso_imagenes: document.getElementById("f_imagenes").checked
-  });
-  btn.disabled = false; btn.textContent = "Enviar inscripción";
+
+  let data = null, error = null;
+  try {
+    const res = await db.rpc("inscribir", {
+      p_actividad_id: actividadActual.id,
+      p_nombre_nino: document.getElementById("f_nino").value.trim(),
+      p_fecha_nacimiento: document.getElementById("f_nacimiento").value,
+      p_observaciones: document.getElementById("f_obs").value.trim(),
+      p_nombre_tutor: document.getElementById("f_tutor").value.trim(),
+      p_email: document.getElementById("f_email").value.trim(),
+      p_telefono: document.getElementById("f_telefono").value.trim(),
+      p_uso_imagenes: document.getElementById("f_imagenes").checked
+    });
+    data = res.data; error = res.error;
+  } catch (ex) {
+    error = ex;
+  }
+
+  enviando = false;
+
   if (error || (data && data.ok === false)) {
-    err.textContent = (data && (data.mensaje || data.error)) || "No se pudo completar la inscripción. Inténtalo de nuevo.";
+    if (esErrorDuplicado(error, data)) {
+      err.textContent = "Ya existe una inscripción con este email para esta actividad. Si crees que es un error, contacta con nosotros. 😊";
+    } else {
+      err.textContent = (data && (data.mensaje || data.error)) || "No se pudo completar la inscripción. Comprueba tu conexión e inténtalo de nuevo.";
+    }
     err.style.display = "block";
     console.error(error || data);
+    btn.disabled = false; btn.textContent = "Enviar inscripción";
     return;
   }
 
- // Éxito → mostrar botón de pago solo si hay enlace configurado
+  // Éxito → mostrar pantalla de confirmación
   const urlPago = pagoUrlDe(actividadActual);
   if (urlPago) {
     document.getElementById("btnPago").href = urlPago;
     document.getElementById("btnPago").style.display = "block";
+    document.getElementById("exitoTexto").innerHTML = EXITO_TEXTO_PAGO;
   } else {
     document.getElementById("btnPago").style.display = "none";
-    document.querySelector("#exito p").innerHTML = "Nos pondremos en contacto contigo para confirmar la plaza e indicarte cómo realizar el pago.";
+    document.getElementById("exitoTexto").innerHTML = EXITO_TEXTO_SIN_PAGO;
   }
+  document.getElementById("formulario").style.display = "none";
+  document.getElementById("exito").style.display = "block";
 });
 
 cargar();
