@@ -31,8 +31,8 @@
   .plazas.lleno { color:#c00; }
   .precio { font-size:24px; font-weight:800; margin-top:10px; }
   .precio span { font-size:13px; font-weight:400; color:#666; }
-  button.inscribir { margin-top:14px; background:#111; color:#fff; border:none; border-radius:9px;
-          padding:13px; font-size:15px; font-weight:600; cursor:pointer; }
+  button.inscribir, a.inscribir { margin-top:14px; background:#111; color:#fff; border:none; border-radius:9px;
+          padding:13px; font-size:15px; font-weight:600; cursor:pointer; text-align:center; text-decoration:none; display:block; }
   button.inscribir:disabled { background:#bbb; cursor:not-allowed; }
   /* Modal */
   .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:10;
@@ -165,6 +165,22 @@ const SUPABASE_KEY = "sb_publishable_lAtrJRKGC4ysFiLu2bWCjQ_6A-X4FDN";
 // Si cada actividad tiene su propio enlace, lee las instrucciones bajo el código.
 const PAGO_URL_GENERAL = "";
 
+// ============================================================
+// 👉 BONO DE 10 HORAS (Servicio de acogida)
+// Rellena el precio y el enlace de pago de Stripe del bono.
+// Se muestra como tarjeta extra SIN quitar los otros servicios.
+// Si algún día creas el bono como fila en Supabase (con la
+// palabra "bono" en el nombre), esta tarjeta manual se ocultará
+// sola para que no salga duplicada.
+// ============================================================
+const BONO_ACOGIDA = {
+  activo: true,
+  nombre: "Bono de 10 horas",
+  descripcion: "Bono flexible de 10 horas de acogida para usar cuando lo necesites durante el curso. Ideal para familias que solo necesitan el servicio de forma puntual.",
+  precio: "",        // ej: "45,00"  → se mostrará "45,00 €"
+  pago_url: ""       // ej: "https://buy.stripe.com/xxxxx"
+};
+
 const EXITO_TEXTO_PAGO = "Para reservar la plaza, completa ahora el pago de la primera cuota.<br>La plaza no queda confirmada hasta realizar el pago.";
 const EXITO_TEXTO_SIN_PAGO = "Nos pondremos en contacto contigo para confirmar la plaza e indicarte cómo realizar el pago.";
 
@@ -182,13 +198,17 @@ async function cargar() {
   actividades = data;
   const semanales = data.filter(a => !esAcogida(a));
   const acogida  = data.filter(a => esAcogida(a));
+  // Tarjeta del bono: solo se añade manualmente si no existe ya un "bono" en la base de datos
+  const hayBonoEnBD = acogida.some(a => esBono(a));
+  const extraBono = (BONO_ACOGIDA.activo && !hayBonoEnBD) ? bonoCard() : "";
   cont.className = "";
   cont.innerHTML =
     seccion("Actividades semanales", semanales) +
-    (acogida.length ? seccion("Servicio de acogida", acogida) : "");
+    ((acogida.length || extraBono) ? seccion("Servicio de acogida", acogida, extraBono) : "");
 }
 
-function esAcogida(a){ return (a.categoria||"").toLowerCase().includes("acog") || (a.nombre||"").toLowerCase().includes("acogida"); }
+function esAcogida(a){ return (a.categoria||"").toLowerCase().includes("acog") || (a.nombre||"").toLowerCase().includes("acogida") || (a.nombre||"").toLowerCase().includes("bono"); }
+function esBono(a){ return (a.nombre||"").toLowerCase().includes("bono"); }
 function horarioDe(a){ return a.horario || ((a.hora_inicio&&a.hora_fin) ? a.hora_inicio.slice(0,5)+" – "+a.hora_fin.slice(0,5) : ""); }
 function edadDe(a){ if(a.edad_texto) return a.edad_texto; if(a.edad_min&&a.edad_max) return a.edad_min+" – "+a.edad_max+" años"; return "Grupos según edad y demanda"; }
 function libresDe(a){ return (a.plazas_totales ?? 0) - (a.plazas_ocupadas ?? 0); }
@@ -216,22 +236,42 @@ function pagoUrlDe(a){
   return PAGO_URL_GENERAL;
 }
 
-function seccion(titulo, lista){
+function bonoCard(){
+  const b = BONO_ACOGIDA;
+  const precio = b.precio ? b.precio + " €" : "Consultar";
+  let boton;
+  if (b.pago_url) {
+    boton = `<a class="inscribir" href="${b.pago_url}" target="_blank">Comprar bono 💳</a>`;
+  } else {
+    boton = `<button class="inscribir" disabled>Próximamente</button>`;
+  }
+  return `<div class="card" style="border-top-color:#7c3aed">
+    <h3>${b.nombre}</h3>
+    <div class="meta">🕐 Horas flexibles · válido todo el curso</div>
+    <div class="desc">${b.descripcion}</div>
+    <div class="badges">👧 Grupos según edad y demanda</div>
+    <div class="precio">${precio} <span>/ bono de 10 horas</span></div>
+    ${boton}
+  </div>`;
+}
+
+function seccion(titulo, lista, extra){
   return `<h2>${titulo}</h2><div class="grid">` + lista.map(a => {
     const libres = libresDe(a);
     const badge = libres <= 0 ? `<span class="plazas lleno">Completo — lista de espera</span>`
                 : libres <= 2 ? `<span class="plazas pocas">¡Últimas ${libres} plazas!</span>`
                 : `<span class="plazas ok">${libres} plazas disponibles</span>`;
-    const color = DIAS_COLOR[a.dia] || "#111";
+    const color = esBono(a) ? "#7c3aed" : (DIAS_COLOR[a.dia] || "#111");
+    const sufijoPrecio = esBono(a) ? "/ bono de 10 horas" : "/ mes";
     return `<div class="card" style="border-top-color:${color}">
       <h3>${a.nombre}</h3>
       <div class="meta">📅 ${a.dia || "Lunes a Viernes"} · ${horarioDe(a)}</div>
       <div class="desc">${a.descripcion || ""}</div>
       <div class="badges">👧 ${edadDe(a)}<br>${badge}</div>
-      <div class="precio">${precioTexto(a)} <span>/ mes</span></div>
+      <div class="precio">${precioTexto(a)} <span>${sufijoPrecio}</span></div>
       <button class="inscribir" onclick="abrirModal(${a.id})" ${libres<=0?"disabled":""}>Inscribir a mi peque</button>
     </div>`;
-  }).join("") + "</div>";
+  }).join("") + (extra || "") + "</div>";
 }
 
 function abrirModal(id){
