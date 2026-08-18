@@ -191,7 +191,7 @@ let enviando = false;
 const DIAS_COLOR = { "Lunes":"#0a7d3b","Martes":"#e11d48","Miércoles":"#4f46e5","Jueves":"#f59e0b","Viernes":"#0891b2" };
 
 async function cargar() {
-  const { data, error } = await db.from("actividades").select("*").order("id");
+  const { data, error } = await db.from("actividades").select("*").eq("activo", true).order("id");
   const cont = document.getElementById("listado");
   if (error) { cont.innerHTML = "⚠️ No se pudieron cargar las actividades. Recarga la página."; console.error(error); return; }
   actividades = data;
