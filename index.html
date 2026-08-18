@@ -161,13 +161,12 @@
 const SUPABASE_URL = "https://fqjiqrcwvjejmurushsf.supabase.co";
 const SUPABASE_KEY = "sb_publishable_lAtrJRKGC4ysFiLu2bWCjQ_6A-X4FDN";
 
-// 👉 PON AQUÍ TU ENLACE de pago de Stripe (el general).
-// Si cada actividad tiene su propio enlace, lee las instrucciones bajo el código.
+// Sin enlace general: cada actividad usa su propio enlace de pago
+// guardado en su fila de Supabase (columna cuyo nombre contenga "pago" o "stripe").
 const PAGO_URL_GENERAL = "";
 
 // ============================================================
 // 👉 BONO DE 10 HORAS (Servicio de acogida)
-// Rellena el precio y el enlace de pago de Stripe del bono.
 // Se muestra como tarjeta extra SIN quitar los otros servicios.
 // Si algún día creas el bono como fila en Supabase (con la
 // palabra "bono" en el nombre), esta tarjeta manual se ocultará
@@ -177,8 +176,8 @@ const BONO_ACOGIDA = {
   activo: true,
   nombre: "Bono de 10 horas",
   descripcion: "Bono flexible de 10 horas de acogida para usar cuando lo necesites durante el curso. Ideal para familias que solo necesitan el servicio de forma puntual.",
-  precio: "",        // ej: "45,00"  → se mostrará "45,00 €"
-  pago_url: ""       // ej: "https://buy.stripe.com/xxxxx"
+  precio: "75,00",
+  pago_url: "https://buy.stripe.com/bJe4gA2njaM62Kqbp42B200"
 };
 
 const EXITO_TEXTO_PAGO = "Para reservar la plaza, completa ahora el pago de la primera cuota.<br>La plaza no queda confirmada hasta realizar el pago.";
@@ -207,7 +206,13 @@ async function cargar() {
     ((acogida.length || extraBono) ? seccion("Servicio de acogida", acogida, extraBono) : "");
 }
 
-function esAcogida(a){ return (a.categoria||"").toLowerCase().includes("acog") || (a.nombre||"").toLowerCase().includes("acogida") || (a.nombre||"").toLowerCase().includes("bono"); }
+// Van a la sección "Servicio de acogida": acogida, bonos y servicios educativos
+function esAcogida(a){
+  const nombre = (a.nombre||"").toLowerCase();
+  const categoria = (a.categoria||"").toLowerCase();
+  return categoria.includes("acog") || categoria.includes("educativ")
+      || nombre.includes("acogida") || nombre.includes("bono") || nombre.includes("educativ");
+}
 function esBono(a){ return (a.nombre||"").toLowerCase().includes("bono"); }
 function horarioDe(a){ return a.horario || ((a.hora_inicio&&a.hora_fin) ? a.hora_inicio.slice(0,5)+" – "+a.hora_fin.slice(0,5) : ""); }
 function edadDe(a){ if(a.edad_texto) return a.edad_texto; if(a.edad_min&&a.edad_max) return a.edad_min+" – "+a.edad_max+" años"; return "Grupos según edad y demanda"; }
