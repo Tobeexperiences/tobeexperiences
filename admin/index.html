@@ -25,7 +25,7 @@ let tab = "dashboard", busqueda = "", filtroActividad = "todas";
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt = n => Number(n || 0).toLocaleString("es-ES", {style:"currency", currency:"EUR"});
 /* ⚠️ Ajusta estos dos si tus columnas se llaman distinto en Supabase: */
-const precioDe = a => Number(a.precio ?? a.precio_euros ?? a.precio_mes ?? 0);
+const precioDe = a => Number(a.precio_cents ?? 0) / 100;
 const plazasDe = a => Number(a.plazas ?? a.plazas_totales ?? 0);
 
 const PALETA = ["bg-rose-500","bg-indigo-500","bg-amber-500","bg-teal-600","bg-teal-500","bg-purple-500"];
