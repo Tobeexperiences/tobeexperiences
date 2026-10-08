@@ -1,1 +1,394 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ToBe Experiences · Actividades Extraescolares</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  body { background:#fff; color:#111; }
+  .admin-link { text-align:center; padding:12px; }
+  .admin-link a { color:#888; font-size:13px; }
+  .hero { background:#0a0a0a; color:#fff; text-align:center; padding:70px 20px 80px; }
+  .logo { font-size:52px; font-weight:900; font-style:italic; letter-spacing:-1px; }
+  .logo-sub { letter-spacing:14px; font-size:15px; font-weight:600; margin-top:2px; }
+  .logo-line { width:230px; height:4px; background:#fff; margin:14px auto 0; border-radius:2px; transform:skewX(-30deg); }
+  .hero h1 { font-size:44px; font-weight:800; margin-top:45px; }
+  .hero p { color:#bbb; font-size:19px; margin-top:16px; line-height:1.5; }
+  .container { max-width:1100px; margin:0 auto; padding:50px 20px 80px; }
+  h2 { font-size:26px; font-weight:800; margin:35px 0 20px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:22px; }
+  .card { border:1px solid #e5e5e5; border-radius:14px; padding:22px; border-top:5px solid #111;
+          box-shadow:0 2px 8px rgba(0,0,0,.05); display:flex; flex-direction:column; }
+  .card h3 { font-size:20px; margin-bottom:6px; }
+  .meta { color:#555; font-size:14px; margin-bottom:12px; }
+  .desc { font-size:14.5px; color:#333; line-height:1.55; flex:1; }
+  .badges { margin-top:14px; font-size:14px; line-height:1.9; }
+  .plazas { font-weight:700; }
+  .plazas.ok { color:#0a7d3b; }
+  .plazas.pocas { color:#c96a00; }
+  .plazas.lleno { color:#c00; }
+  .precio { font-size:24px; font-weight:800; margin-top:10px; }
+  .precio span { font-size:13px; font-weight:400; color:#666; }
+  button.inscribir, a.inscribir { margin-top:14px; background:#111; color:#fff; border:none; border-radius:9px;
+          padding:13px; font-size:15px; font-weight:600; cursor:pointer; text-align:center; text-decoration:none; display:block; }
+  button.inscribir:disabled { background:#bbb; cursor:not-allowed; }
+  /* Modal */
+  .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:10;
+             align-items:center; justify-content:center; padding:20px; }
+  .overlay.open { display:flex; }
+  .modal { background:#fff; border-radius:16px; max-width:460px; width:100%; padding:28px;
+           max-height:90vh; overflow:auto; }
+  .modal h3 { font-size:20px; margin-bottom:18px; }
+  .modal label { display:block; font-size:13.5px; font-weight:600; margin:12px 0 4px; }
+  .modal input[type=text], .modal input[type=email], .modal input[type=tel],
+  .modal input[type=date], .modal textarea {
+      width:100%; padding:10px; border:1px solid #ccc; border-radius:8px; font-size:15px; }
+  .check { display:flex; gap:8px; margin-top:14px; font-size:13.5px; align-items:flex-start; }
+  .check a { color:#111; font-weight:600; }
+  .modal .error { color:#c00; font-size:14px; margin-top:12px; display:none; }
+  .modal .acciones { display:flex; gap:10px; margin-top:20px; }
+  .modal .acciones button, .modal .acciones a { flex:1; padding:12px; border-radius:9px; font-size:15px;
+      font-weight:600; cursor:pointer; text-align:center; text-decoration:none; display:block; }
+  .btn-cancel { background:#eee; border:none; color:#111; }
+  .btn-send { background:#111; color:#fff; border:none; }
+  .btn-send:disabled { background:#bbb; cursor:not-allowed; }
+  .btn-pago { background:#0a7d3b; color:#fff; border:none; }
+  .exito { text-align:center; padding:20px 0; }
+  .exito .icono { font-size:52px; }
+  .exito p { margin-top:10px; color:#555; line-height:1.5; }
+  .cargando { text-align:center; color:#888; padding:60px 0; font-size:17px; }
+  /* Política de privacidad */
+  .politica { font-size:14px; line-height:1.65; color:#333; }
+  .politica h4 { margin:14px 0 6px; font-size:15px; }
+  footer { background:#0a0a0a; color:#999; text-align:center; padding:30px 20px; font-size:13.5px; }
+  footer a { color:#ccc; }
+</style>
+</head>
+<body>
 
+
+<div class="hero">
+  <div class="logo">ToBe</div>
+  <div class="logo-sub">EXPERIENCES</div>
+  <div class="logo-line"></div>
+  <h1>Actividades Extraescolares</h1>
+  <p>Curso 2026 – 2027 · Cuota mensual con cargo automático.<br>Inscripción online en 2 minutos.</p>
+</div>
+
+<div class="container">
+  <div id="listado" class="cargando">Cargando actividades…</div>
+</div>
+
+<footer>
+  ToBe Experiences · <a href="#" onclick="abrirPolitica(); return false;">Política de privacidad</a>
+</footer>
+
+<!-- Modal de inscripción -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div id="formulario">
+      <h3 id="modalTitulo">Inscripción</h3>
+      <form id="form">
+        <label>Nombre del niño/a *</label>
+        <input type="text" id="f_nino" required>
+        <label>Fecha de nacimiento *</label>
+        <input type="date" id="f_nacimiento" required>
+        <label>Nombre del padre/madre/tutor *</label>
+        <input type="text" id="f_tutor" required>
+        <label>Email *</label>
+        <input type="email" id="f_email" required>
+        <label>Teléfono *</label>
+        <input type="tel" id="f_telefono" required>
+        <label>Observaciones (alergias, necesidades…)</label>
+        <textarea id="f_obs" rows="2"></textarea>
+        <div class="check">
+          <input type="checkbox" id="f_imagenes">
+          <span>Autorizo el uso de imágenes de mi hijo/a en comunicaciones de ToBe Experiences.</span>
+        </div>
+        <div class="check">
+          <input type="checkbox" id="f_privacidad" required>
+         <span>He leído y acepto la <a href="privacidad.html" target="_blank">Política de Privacidad</a> y las <a href="condiciones.html" target="_blank">Condiciones de Inscripción</a>. *</span>
+        </div>
+        <div class="error" id="f_error"></div>
+        <div class="acciones">
+          <button type="button" class="btn-cancel" id="btnCancelar" onclick="cerrarModal()">Cancelar</button>
+          <button type="submit" class="btn-send" id="btnEnviar">Enviar inscripción</button>
+        </div>
+      </form>
+    </div>
+    <div id="exito" class="exito" style="display:none">
+      <div class="icono">✅</div>
+      <h3>¡Inscripción recibida!</h3>
+      <p id="exitoTexto">Para reservar la plaza, completa ahora el pago de la primera cuota.<br>
+      La plaza no queda confirmada hasta realizar el pago.</p>
+      <div class="acciones">
+        <a class="btn-pago" id="btnPago" href="#" target="_blank">Realizar el pago 💳</a>
+      </div>
+      <div class="acciones">
+        <button class="btn-cancel" onclick="cerrarModal(true)">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal política de privacidad -->
+<div class="overlay" id="overlayPolitica">
+  <div class="modal">
+    <h3>Política de privacidad</h3>
+    <div class="politica">
+      <h4>Responsable del tratamiento</h4>
+      <p>ToBe Experiences (en adelante, "la organización") es responsable del tratamiento de los datos personales facilitados a través de este formulario.</p>
+      <h4>Finalidad</h4>
+      <p>Los datos se recogen para gestionar la inscripción del menor en las actividades extraescolares, la comunicación con las familias y la gestión del cobro de las cuotas mensuales.</p>
+      <h4>Datos de menores</h4>
+      <p>Los datos del menor son facilitados por su padre, madre o tutor legal, que declara tener capacidad para ello. El uso de imágenes del menor solo se realizará si se ha marcado la autorización expresa correspondiente.</p>
+      <h4>Conservación</h4>
+      <p>Los datos se conservarán mientras dure la relación con la organización y, posteriormente, durante los plazos legalmente exigibles.</p>
+      <h4>Destinatarios</h4>
+      <p>No se cederán datos a terceros salvo obligación legal. El pago se procesa a través de una pasarela de pago segura; la organización no almacena datos bancarios completos.</p>
+      <h4>Derechos</h4>
+      <p>Puedes ejercer tus derechos de acceso, rectificación, supresión, oposición, limitación y portabilidad escribiendo a la organización. También puedes reclamar ante la Agencia Española de Protección de Datos (www.aepd.es).</p>
+    </div>
+    <div class="acciones" style="display:flex;gap:10px;margin-top:20px">
+      <button class="btn-send" style="flex:1;padding:12px;border-radius:9px;border:none;font-size:15px;font-weight:600;cursor:pointer" onclick="cerrarPolitica()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://fqjiqrcwvjejmurushsf.supabase.co";
+const SUPABASE_KEY = "sb_publishable_lAtrJRKGC4ysFiLu2bWCjQ_6A-X4FDN";
+
+// Sin enlace general: cada actividad usa su propio enlace de pago
+// guardado en su fila de Supabase (columna cuyo nombre contenga "pago" o "stripe").
+const PAGO_URL_GENERAL = "";
+
+// ============================================================
+// 👉 BONO DE 10 HORAS (Servicio de acogida)
+// Se muestra como tarjeta extra SIN quitar los otros servicios.
+// Si algún día creas el bono como fila en Supabase (con la
+// palabra "bono" en el nombre), esta tarjeta manual se ocultará
+// sola para que no salga duplicada.
+// ============================================================
+const BONO_ACOGIDA = {
+  activo: true,
+  nombre: "Bono de 10 horas",
+  descripcion: "Bono flexible de 10 horas de acogida para usar cuando lo necesites durante el curso. Ideal para familias que solo necesitan el servicio de forma puntual.",
+  precio: "75,00",
+  pago_url: "https://buy.stripe.com/bJe4gA2njaM62Kqbp42B200"
+};
+
+const EXITO_TEXTO_PAGO = "Para reservar la plaza, completa ahora el pago de la primera cuota.<br>La plaza no queda confirmada hasta realizar el pago.";
+const EXITO_TEXTO_SIN_PAGO = "Nos pondremos en contacto contigo para confirmar la plaza e indicarte cómo realizar el pago.";
+
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let actividades = [];
+let actividadActual = null;
+let enviando = false;
+
+const DIAS_COLOR = { "Lunes":"#0a7d3b","Martes":"#e11d48","Miércoles":"#4f46e5","Jueves":"#f59e0b","Viernes":"#0891b2" };
+
+async function cargar() {
+  const { data, error } = await db.from("actividades").select("*").eq("activo", true).order("id");
+  const cont = document.getElementById("listado");
+  if (error) { cont.innerHTML = "⚠️ No se pudieron cargar las actividades. Recarga la página."; console.error(error); return; }
+  actividades = data;
+  const semanales = data.filter(a => !esAcogida(a));
+  const acogida  = data.filter(a => esAcogida(a));
+  // Tarjeta del bono: solo se añade manualmente si no existe ya un "bono" en la base de datos
+  const hayBonoEnBD = acogida.some(a => esBono(a));
+  const extraBono = (BONO_ACOGIDA.activo && !hayBonoEnBD) ? bonoCard() : "";
+  cont.className = "";
+  cont.innerHTML =
+    seccion("Actividades semanales", semanales) +
+    ((acogida.length || extraBono) ? seccion("Servicio de acogida", acogida, extraBono) : "");
+}
+
+// Van a la sección "Servicio de acogida": acogida, bonos y servicios educativos
+function esAcogida(a){
+  const nombre = (a.nombre||"").toLowerCase();
+  const categoria = (a.categoria||"").toLowerCase();
+  return categoria.includes("acog") || categoria.includes("educativ")
+      || nombre.includes("acogida") || nombre.includes("bono") || nombre.includes("educativ");
+}
+function esBono(a){ return (a.nombre||"").toLowerCase().includes("bono"); }
+function horarioDe(a){ return a.horario || ((a.hora_inicio&&a.hora_fin) ? a.hora_inicio.slice(0,5)+" – "+a.hora_fin.slice(0,5) : ""); }
+function edadDe(a){ if(a.edad_texto) return a.edad_texto; if(a.edad_min&&a.edad_max) return a.edad_min+" – "+a.edad_max+" años"; return "Grupos según edad y demanda"; }
+function libresDe(a){ return (a.plazas_totales ?? 0) - (a.plazas_ocupadas ?? 0); }
+
+function precioTexto(a){
+  for (const k in a) {
+    const nombre = k.toLowerCase();
+    if (nombre.includes("precio") || nombre.includes("cuota") || nombre.includes("importe") || nombre.includes("tarifa")) {
+      const v = Number(a[k]);
+      if (!isNaN(v) && v > 0) {
+        const euros = v >= 500 ? v / 100 : v;
+        return euros.toFixed(2).replace(".", ",") + " €";
+      }
+    }
+  }
+  return "Consultar";
+}
+
+function pagoUrlDe(a){
+  // Si la actividad tiene su propia URL de pago en Supabase, se usa; si no, la general
+  for (const k in a) {
+    const nombre = k.toLowerCase();
+    if ((nombre.includes("pago") || nombre.includes("stripe")) && typeof a[k] === "string" && a[k].startsWith("http")) return a[k];
+  }
+  return PAGO_URL_GENERAL;
+}
+
+function bonoCard(){
+  const b = BONO_ACOGIDA;
+  const precio = b.precio ? b.precio + " €" : "Consultar";
+  let boton;
+  if (b.pago_url) {
+    boton = `<a class="inscribir" href="${b.pago_url}" target="_blank">Comprar bono 💳</a>`;
+  } else {
+    boton = `<button class="inscribir" disabled>Próximamente</button>`;
+  }
+  return `<div class="card" style="border-top-color:#7c3aed">
+    <h3>${b.nombre}</h3>
+    <div class="meta">🕐 Horas flexibles · válido todo el curso</div>
+    <div class="desc">${b.descripcion}</div>
+    <div class="badges">👧 Grupos según edad y demanda</div>
+    <div class="precio">${precio} <span>/ bono de 10 horas</span></div>
+    ${boton}
+  </div>`;
+}
+
+function seccion(titulo, lista, extra){
+  return `<h2>${titulo}</h2><div class="grid">` + lista.map(a => {
+    const libres = libresDe(a);
+    const badge = libres <= 0 ? `<span class="plazas lleno">Completo — lista de espera</span>`
+                : libres <= 2 ? `<span class="plazas pocas">¡Últimas ${libres} plazas!</span>`
+                : `<span class="plazas ok">${libres} plazas disponibles</span>`;
+    const color = esBono(a) ? "#7c3aed" : (DIAS_COLOR[a.dia] || "#111");
+    const sufijoPrecio = esBono(a) ? "/ bono de 10 horas" : "/ mes";
+    return `<div class="card" style="border-top-color:${color}">
+      <h3>${a.nombre}</h3>
+      <div class="meta">📅 ${a.dia || "Lunes a Viernes"} · ${horarioDe(a)}</div>
+      <div class="desc">${a.descripcion || ""}</div>
+      <div class="badges">👧 ${edadDe(a)}<br>${badge}</div>
+      <div class="precio">${precioTexto(a)} <span>${sufijoPrecio}</span></div>
+      <button class="inscribir" onclick="abrirModal(${a.id})" ${libres<=0?"disabled":""}>Inscribir a mi peque</button>
+    </div>`;
+  }).join("") + (extra || "") + "</div>";
+}
+
+function abrirModal(id){
+  actividadActual = actividades.find(a => a.id === id);
+  document.getElementById("modalTitulo").textContent = "Inscripción · " + actividadActual.nombre;
+  document.getElementById("form").reset();
+  document.getElementById("f_error").style.display = "none";
+  document.getElementById("formulario").style.display = "block";
+  document.getElementById("exito").style.display = "none";
+  const btn = document.getElementById("btnEnviar");
+  btn.disabled = false; btn.textContent = "Enviar inscripción";
+  document.getElementById("overlay").classList.add("open");
+}
+function cerrarModal(recargar){
+  if (enviando) return; // no cerrar mientras se está enviando
+  document.getElementById("overlay").classList.remove("open");
+  if (recargar) cargar();
+}
+function abrirPolitica(){ document.getElementById("overlayPolitica").classList.add("open"); }
+function cerrarPolitica(){ document.getElementById("overlayPolitica").classList.remove("open"); }
+
+function esErrorDuplicado(error, data){
+  const texto = [
+    error && error.code,
+    error && error.message,
+    error && error.details,
+    error && error.hint,
+    data && data.error,
+    data && data.mensaje
+  ].filter(Boolean).join(" ").toLowerCase();
+  return texto.includes("23505") || texto.includes("inscripcion_unica") || texto.includes("duplicate key");
+}
+
+document.getElementById("form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if (enviando) return; // evita doble envío
+  const err = document.getElementById("f_error");
+  err.style.display = "none";
+
+  if (!document.getElementById("f_privacidad").checked) {
+    err.textContent = "Debes aceptar la política de privacidad para continuar.";
+    err.style.display = "block"; return;
+  }
+
+  const nac = new Date(document.getElementById("f_nacimiento").value);
+  const edad = Math.floor((Date.now() - nac) / (365.25*24*3600*1000));
+  if (actividadActual.edad_min && edad < actividadActual.edad_min) {
+    err.textContent = `Esta actividad es para peques a partir de ${actividadActual.edad_min} años. ¡Seguro que pronto podrá apuntarse! 😊`;
+    err.style.display = "block"; return;
+  }
+  if (actividadActual.edad_max && edad > actividadActual.edad_max) {
+    err.textContent = `Esta actividad es para peques de hasta ${actividadActual.edad_max} años.`;
+    err.style.display = "block"; return;
+  }
+
+  const btn = document.getElementById("btnEnviar");
+  enviando = true;
+  btn.disabled = true; btn.textContent = "Enviando…";
+
+  let data = null, error = null;
+  try {
+    const res = await db.rpc("inscribir", {
+      p_actividad_id: actividadActual.id,
+      p_nombre_nino: document.getElementById("f_nino").value.trim(),
+      p_fecha_nacimiento: document.getElementById("f_nacimiento").value,
+      p_observaciones: document.getElementById("f_obs").value.trim(),
+      p_nombre_tutor: document.getElementById("f_tutor").value.trim(),
+      p_email: document.getElementById("f_email").value.trim(),
+      p_telefono: document.getElementById("f_telefono").value.trim(),
+      p_uso_imagenes: document.getElementById("f_imagenes").checked
+    });
+    data = res.data; error = res.error;
+  } catch (ex) {
+    error = ex;
+  }
+
+  enviando = false;
+
+  if (error || (data && data.ok === false)) {
+    if (esErrorDuplicado(error, data)) {
+      err.textContent = "Ya existe una inscripción con este email para esta actividad. Si crees que es un error, contacta con nosotros. 😊";
+    } else {
+      err.textContent = (data && (data.mensaje || data.error)) || "No se pudo completar la inscripción. Comprueba tu conexión e inténtalo de nuevo.";
+    }
+    err.style.display = "block";
+    console.error(error || data);
+    btn.disabled = false; btn.textContent = "Enviar inscripción";
+    return;
+  }
+
+  // Éxito → mostrar pantalla de confirmación
+  const urlPago = pagoUrlDe(actividadActual);
+  if (urlPago) {
+    document.getElementById("btnPago").href = urlPago;
+    document.getElementById("btnPago").style.display = "block";
+    document.getElementById("exitoTexto").innerHTML = EXITO_TEXTO_PAGO;
+  } else {
+    document.getElementById("btnPago").style.display = "none";
+    document.getElementById("exitoTexto").innerHTML = EXITO_TEXTO_SIN_PAGO;
+  }
+  document.getElementById("formulario").style.display = "none";
+  document.getElementById("exito").style.display = "block";
+});
+
+cargar();
+  </script>
+
+  <footer>
+    <a href="privacidad.html">Política de privacidad</a> ·
+    <a href="condiciones.html">Condiciones de inscripción</a> ·
+    <a href="aviso-legal.html">Aviso legal</a>
+  </footer>
+
+</body>
+</html>
