@@ -10,7 +10,7 @@
   body { background:#fff; color:#111; }
   .admin-link { text-align:center; padding:12px; }
   .admin-link a { color:#888; font-size:13px; }
-  .hero { background:#0a0a0a; color:#fff; text-align:center; padding:70px 20px 80px; }
+  .hero { background:#0a0a0a; color:#fff; text-align:center; padding:40px 20px 80px; }
   .logo { font-size:52px; font-weight:900; font-style:italic; letter-spacing:-1px; }
   .logo-sub { letter-spacing:14px; font-size:15px; font-weight:600; margin-top:2px; }
   .logo-line { width:230px; height:4px; background:#fff; margin:14px auto 0; border-radius:2px; transform:skewX(-30deg); }
@@ -68,6 +68,9 @@
 </head>
 <body>
 
+<div style="background:#0a0a0a;padding:14px 20px 0;text-align:left;max-width:1100px;margin:0 auto">
+  <a href="/" style="color:#999;font-size:14px;text-decoration:none">← ToBe Experiences · Inicio</a>
+</div>
 
 <div class="hero">
   <div class="logo">ToBe</div>
@@ -80,10 +83,6 @@
 <div class="container">
   <div id="listado" class="cargando">Cargando actividades…</div>
 </div>
-
-<footer>
-  ToBe Experiences · <a href="#" onclick="abrirPolitica(); return false;">Política de privacidad</a>
-</footer>
 
 <!-- Modal de inscripción -->
 <div class="overlay" id="overlay">
@@ -109,7 +108,7 @@
         </div>
         <div class="check">
           <input type="checkbox" id="f_privacidad" required>
-         <span>He leído y acepto la <a href="privacidad.html" target="_blank">Política de Privacidad</a> y las <a href="condiciones.html" target="_blank">Condiciones de Inscripción</a>. *</span>
+         <span>He leído y acepto la <a href="/privacidad.html" target="_blank">Política de Privacidad</a> y las <a href="/condiciones.html" target="_blank">Condiciones de Inscripción</a>. *</span>
         </div>
         <div class="error" id="f_error"></div>
         <div class="acciones">
@@ -384,11 +383,13 @@ document.getElementById("form").addEventListener("submit", async (e) => {
 cargar();
   </script>
 
-  <footer>
-    <a href="privacidad.html">Política de privacidad</a> ·
-    <a href="condiciones.html">Condiciones de inscripción</a> ·
-    <a href="aviso-legal.html">Aviso legal</a>
-  </footer>
+<footer>
+  ToBe Experiences ·
+  <a href="/">Inicio</a> ·
+  <a href="/privacidad.html">Política de privacidad</a> ·
+  <a href="/condiciones.html">Condiciones de inscripción</a> ·
+  <a href="/aviso-legal.html">Aviso legal</a>
+</footer>
 
 </body>
 </html>
